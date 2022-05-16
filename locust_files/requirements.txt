@@ -1,0 +1,6 @@
+pyaml
+p4python==2017.2.1615960
+numpy
+pyzmq
+locustio
+mimesis

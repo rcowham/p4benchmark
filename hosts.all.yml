@@ -1,0 +1,21 @@
+# Ansible hosts file in YAML format
+#
+# Sometimes useful to setup a hosts.XXX.yml file with a subset
+# of hosts you want to run actions on. If in YAML format then
+# it must be called abc.yml - unless it is called hosts!
+all:
+  vars:
+    remote_user: perforce
+    bench_dir: /p4/benchmark
+    # Number of workers per bench_client
+    num_workers: 8
+
+  children:
+    replicas:
+      hosts:
+        replica1:
+        replica2:
+    bench_clients:
+      hosts:
+        client1:
+        client2:

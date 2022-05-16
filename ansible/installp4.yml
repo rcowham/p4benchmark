@@ -1,0 +1,11 @@
+- name: Make sure p4 command line is present
+  hosts: all
+  serial: 1
+  tasks:
+
+    - name: Download p4
+      get_url:
+        url:  ftp://ftp.perforce.com/perforce/r18.1/bin.linux26x86_64/p4
+        dest: /usr/local/bin
+        mode: 0755
+      become: yes

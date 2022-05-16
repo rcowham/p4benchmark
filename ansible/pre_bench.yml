@@ -1,0 +1,23 @@
+- name: Install p4benchmark scripts
+  hosts: bench_clients
+  tasks:
+
+    - name: Ensures directory exists
+      file: path={{bench_dir}} state=directory
+
+    - name: Copy relevant files to client machines
+      copy:
+        src: "{{item}}"
+        dest: "{{bench_dir}}"
+      with_fileglob:
+        - "{{bench_dir}}/config_p4_*.yml"
+        - "{{bench_dir}}/locust_files/*.py"
+        - "{{bench_dir}}/utils/run_worker.sh"
+        - "{{bench_dir}}/bench_p4config.txt"
+
+    - name: Create a directory for perforce workspaces on /home
+      file:
+        path: /home/p4
+        state: directory
+        owner: perforce
+      become: true

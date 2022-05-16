@@ -1,0 +1,14 @@
+- name: Copy nethogs logs
+  hosts: replicas
+  remote_user: perforce
+  vars:
+    bench_dir: /p4/benchmark
+  tasks:
+
+    - name: Copy log files
+      fetch:
+        src: "{{bench_dir}}/{{item}}"
+        dest: "{{bench_dir}}/logs/{{inventory_hostname}}-{{item}}"
+        flat: yes
+      with_items:
+      - network.out

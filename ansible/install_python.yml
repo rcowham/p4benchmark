@@ -1,0 +1,45 @@
+- name: Transfer and execute a script to install python.
+  hosts: bench_clients
+  become: yes
+  tasks:
+
+    - name: install packages for development etc
+      yum:
+        name:
+        - yum-utils
+
+    - name: clean
+      command: yum clean -y all
+
+    - name: install repos
+      yum:
+        name:
+        - https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+        - https://centos7.iuscommunity.org/ius-release.rpm
+
+    - name: update
+      command: yum update -y
+
+    - name: install python 3.6
+      yum:
+        name:
+        - python36u
+        - python36u-pip
+        - python36u-devel
+        state: present
+
+    - file:
+        src: /usr/bin/python3.6
+        dest: /usr/bin/python3
+        mode: 0755
+        state: link
+
+    - file:
+        src: /usr/bin/pip3.6
+        dest: /usr/bin/pip3
+        mode: 0755
+        state: link
+
+    - name: Pip install packages
+      command: pip3.6 install p4python==2017.2.1615960 pyaml numpy pyzmq locustio mimesis
+

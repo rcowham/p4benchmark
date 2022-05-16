@@ -1,0 +1,15 @@
+- name: Make sure p4 command line is present
+  hosts: replicas
+  var:
+    bin_dir: /home/perforce/bin
+
+  tasks:
+
+     - name: Creates directory
+       file: path={{bin_dir}} state=directory
+
+     - name: Download p4d
+       get_url:
+         url:  ftp://ftp.perforce.com/perforce/r18.1/bin.linux26x86_64/p4d
+         dest: {{bin_dir}}
+         mode: 0755

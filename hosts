@@ -1,0 +1,17 @@
+# Ansible hosts file in YAML format
+#
+# # localhost ansible_connection=local
+#
+all:
+  vars:
+    remote_user: perforce
+    bench_dir: /hxdepots/benchmark
+    # Number of workers per bench_client
+    num_workers: 12
+
+  children:
+    # replicas:
+    #  hosts:
+    bench_clients:
+      hosts:
+        10.0.0.126:

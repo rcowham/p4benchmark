@@ -1,0 +1,19 @@
+- name: Run p4benchmark stuff for replicas
+  hosts: replicas
+  tasks:
+
+  - name: Copy relevant monitoring files
+    copy:
+      src: "{{item}}"
+      dest: "{{bench_dir}}"
+      mode: 0755
+    with_fileglob:
+    - "{{bench_dir}}/run_monitor.sh"
+    - "{{bench_dir}}/run_iftop.sh"
+
+  - command:  "{{bench_dir}}/run_monitor.sh"
+    args:
+      chdir: "{{bench_dir}}"
+    async: 10
+    poll: 0
+

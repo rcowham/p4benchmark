@@ -1,0 +1,13 @@
+- name: Install replica scripts
+  hosts: replicas
+  tasks:
+
+  - name: Creates directory
+    file: path={{ bench_dir }} state=directory
+
+  - name: Copy relevant files
+    copy:
+      src: "{{ item }}"
+      dest: "{{ bench_dir }}"
+    with_fileglob:
+    - "{{ bench_dir }}/run_monitor.sh"

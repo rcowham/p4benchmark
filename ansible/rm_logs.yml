@@ -1,0 +1,15 @@
+- name: Remove p4benchmark logs
+  hosts: bench_clients
+  tasks:
+
+    - name: Find files to delete
+      find:
+        paths: "{{bench_dir}}"
+        patterns: worker*.out
+      register: files_to_delete
+
+    - name: Remove found files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ files_to_delete.files }}"

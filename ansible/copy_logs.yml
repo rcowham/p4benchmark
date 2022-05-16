@@ -1,0 +1,15 @@
+- name: Install p4benchmark scripts
+  hosts: bench_clients
+  tasks:
+    - name: Find files to copy
+      find:
+        paths: "{{bench_dir}}"
+        patterns: worker*.out
+      register: files_to_copy
+
+    - name: Copy log files
+      fetch:
+        src: "{{item.path}}"
+        dest: "{{bench_dir}}/logs/{{inventory_hostname}}-{{item.path | basename}}"
+        flat: yes
+      with_items: "{{files_to_copy.files}}"

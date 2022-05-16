@@ -1,0 +1,7 @@
+- name: Make sure bench clients are OK
+  hosts: bench_clients
+  tasks:
+
+  - name: Creates directory
+    file: path={{ bench_dir }} state=directory
+

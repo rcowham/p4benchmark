@@ -1,0 +1,82 @@
+# Bootstrap machines
+# Best run as user root for example:
+# ansible-playbook bootstrap.yml -i hosts -k -K --extra-vars "hosts=bench_clients user=root"
+
+- hosts: '{{ hosts }}'
+  remote_user: '{{ user }}'
+  sudo: yes
+
+  tasks:
+    - name: Create Perforce User account
+      user: 
+        name: perforce
+        shell: /bin/bash
+        home: /p4
+      become: yes
+
+    - name: Allow perforce user to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%perforce'
+        line: '%perforce ALL=(ALL) NOPASSWD: ALL'
+        validate: visudo -cf %s
+      become: yes
+
+    - name: Make sure .ssh exists
+      file:
+        path: /p4/.ssh
+        state: directory
+        mode: 0700
+      become: true
+      become_user: perforce
+
+    # Copy ssh keys and authorize so user perforce can ssh between boxes
+    - name: Copy ssh private key
+      copy:
+        src: private/id_rsa
+        dest: /p4/.ssh/
+        mode: 0600
+      become: true
+      become_user: perforce
+
+    - name: Set authorized key for perforce
+      authorized_key:
+        user: perforce
+        state: present
+        key: "{{ lookup('file', 'private/id_rsa.pub') }}"
+      become: true
+      become_user: perforce
+
+    - name: Create a directory for perforce workspaces on /home
+      file:
+        path: /home/p4
+        state: directory
+        owner: perforce
+      become: true
+
+    # - name: Create a directory for perforce workspaces on /p4ws
+    #   file:
+    #     path: /p4ws/p4
+    #     state: directory
+    #     owner: perforce
+    #   become: true
+
+    # - name: Create a directory for perforce workspaces on /p4ws_new
+    #   file:
+    #     path: /p4ws_new/p4
+    #     state: directory
+    #     owner: perforce
+    #   become: true
+
+    # - name: Directory for  ram disk
+    #   file:
+    #     path: /ram/disk
+    #     state: directory
+    #     owner: perforce
+    #   become: true
+
+    # - name: Mount ram disk
+    #   command: mount -t tmpfs -o size=50G tmpfs /ram/disk
+    #   become: true
+

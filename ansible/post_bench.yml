@@ -1,0 +1,16 @@
+- name: Tidy up after p4benchmark scripts
+  hosts: bench_clients
+  tasks:
+
+  - name: Kill locust processes if they exist
+    shell: pkill --full 'locust' || true
+    ignore_errors: yes
+
+  - name: Remove base directory which has workspaces - see config_p4_bench.yml
+    file:
+      # path: /ram/disk/ws
+      path: /home/p4/ws
+      # path: /p4ws/p4/ws
+      # path: /p4ws_new/p4/ws
+      state: absent
+

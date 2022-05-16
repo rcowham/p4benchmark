@@ -1,0 +1,47 @@
+version: '3.4'
+
+services:
+
+  master: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: p4benchmaster
+    hostname: master
+    command: /usr/sbin/sshd -D
+    privileged: true
+    entrypoint: /p4/benchmark/docker_entry_master.sh
+    networks:
+      - p4bench
+    tty: true
+
+  client1: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: p4bench
+    hostname: client1
+    command: /usr/sbin/sshd -D
+    networks:
+      - p4bench
+    tty: true
+    depends_on:
+      - master
+
+  client2: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: p4bench
+    hostname: client2
+    command: /usr/sbin/sshd -D
+    networks:
+      - p4bench
+    tty: true
+    depends_on:
+      - master
+
+networks:
+
+  p4bench:
+    driver: bridge

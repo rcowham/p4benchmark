@@ -1,0 +1,6 @@
+# Set ansible facts
+
+- name: Save env vars from localhost for use on target hosts
+  set_fact:
+    p4bench_host: "{{ lookup('env', 'P4BENCH_HOST') }}"
+    p4bench_script: "{{ lookup('env', 'P4BENCH_SCRIPT') }}"

@@ -1,0 +1,25 @@
+general:
+    min_wait: 1000
+    max_wait: 10000
+    workspace_root:  /mnt/ebc-201/bench_tests
+
+# Perforce benchmark testing parameters
+# Specify password if required
+perforce:
+    port:       fm42perforcecontrol001:1666
+    user:       bruno
+    charset:
+    password:
+    # The following should include trailing ...
+    repoPath:   //depot/...
+
+p4user:
+    min_wait: 1000
+    max_wait: 10000
+    repoPath:   //depot/...
+
+p4buildfarm:
+    min_wait: 1000
+    max_wait: 10000
+    repoPath:   //depot/...
+

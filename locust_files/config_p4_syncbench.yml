@@ -1,0 +1,38 @@
+general:
+    min_wait: 1000
+    max_wait: 1000
+    # workspace_root:  /ram/disk/ws
+    # workspace_root:  /home/p4/ws
+    # workspace_root:  /p4ws/p4/ws
+    workspace_root:  /p4ws_new/p4/ws
+
+# Perforce benchmark testing parameters
+# Specify password if required
+# port is an array to allow for multiple possible servers to be specified if required
+perforce:
+    port:       
+    - 10.21.152.35:1666
+    - 10.21.152.36:1666
+    - 10.21.152.37:1666
+    - 10.21.152.38:1666
+    - 10.21.152.39:1666
+    user:       bruno
+    charset:
+    password:
+    options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
+    # The following only takes effect if sync_args not used.
+    sync_progress_size_interval: 100 * 1000 * 1000
+    # The following should not include trailing /...
+    # Will be used as base for selection after running "p4 dirs %s/*"
+    repoPath:   //depot/long_directory_name_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_1234567890_
+    repoSubDir: "*"
+    repoSubDirNum: 50
+    # How many times to repeat the task before exiting
+    repeat: 50
+    # sync_args: any extra sync arguments. This will result in the spawning of a "p4" command
+    # Example to avoid actually writing files to filesystem on client side:
+    #sync_args: -vfilesys.client.nullsync=1
+    sync_args: -vtrack=1
+    # Any other -v or similar options possible.
+    # Note that the following commands will be passed automatically: -p/-u/-c
+
