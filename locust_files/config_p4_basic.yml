@@ -6,19 +6,19 @@ general:
 # Perforce benchmark testing parameters
 # Specify password if required
 perforce:
+    # Array of ports - can include ssl prefix. Allows for random selection of edge servers
     port:       
     - ssl:10.0.0.181:1666
-    # - replica1:1666
     user:       bruno
     charset:
-    password:   "F@stSCM!"
+    password:   "my!Password"
     options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
     sync_progress_size_interval: 100 * 1000 * 1000
-    # The following should not include trailing /...
-    # Will be used as base for selection after running "p4 dirs %s/*"
+    # repoPath: should not include trailing /...
+    #   If it includes "*" will be used as base for selection after running "p4 dirs" on it
     repoPath:   //depot/01
-    repoSubDir: "*"
-    repoSubDirNum: 5
+    # repoDirNum: (numeric) Number of entries to randomly select from the above "p4 dirs" output if relevant
+    repoDirNum: 5
     # How many times to repeat the loop
     repeat: 5
     # sync_args: any extra sync arguments. This will result in the spawning of a "p4" command
