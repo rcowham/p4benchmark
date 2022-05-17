@@ -45,7 +45,7 @@ def basicActions(bench, request_type):
         t.report_success(name, count)
     except Exception as e:
         logger.exception(e)
-        t.report_failure(name, e)
+        t.report_failure(name, e, count)
 
 def reportingActions(bench, request_type):
     "Does describe/fstat/filelog"
@@ -57,7 +57,7 @@ def reportingActions(bench, request_type):
         t.report_success(name, count)
     except Exception as e:
         logger.exception(e)
-        t.report_failure(name, e)
+        t.report_failure(name, e, count)
 
 class AllTasks(TaskSet):
     """Entry point for locust"""
@@ -88,7 +88,7 @@ class AllTasks(TaskSet):
             t.report_success(name, count)
         except Exception as e:
             logger.exception(e)
-            t.report_failure(name, e)
+            t.report_failure(name, e, count)
         t = Timer(self.request_type)
         name = "sync"
         try:
@@ -96,7 +96,7 @@ class AllTasks(TaskSet):
             t.report_success(name, count)
         except Exception as e:
             logger.exception(e)
-            t.report_failure(name, e)
+            t.report_failure(name, e, count)
 
     @task(10)
     def basicActions(self):

@@ -56,9 +56,9 @@ class Timer(object):
         self.start_time = time.time()
         self.request_type = request_type
 
-    def report_failure(self, name, e):
+    def report_failure(self, name, e, count):
         total_time = int((time.time() - self.start_time) * 1000)
-        events.request_failure.fire(request_type=self.request_type, name=name, response_time=total_time, exception=e)
+        events.request_failure.fire(request_type=self.request_type, name=name, response_time=total_time, exception=e, response_length=count)
 
     def report_success(self, name, count):
         total_time = int((time.time() - self.start_time) * 1000)
