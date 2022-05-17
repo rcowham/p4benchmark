@@ -47,7 +47,7 @@ def buildFarmActions(bench, request_type):
         t.report_success(name, count)
     except Exception as e:
         logger.exception(e)
-        t.report_failure(name, e)
+        t.report_failure(name, e, count)
     t = Timer(request_type)
     name = "sync"
     try:
@@ -55,7 +55,7 @@ def buildFarmActions(bench, request_type):
         t.report_success(name, count)
     except Exception as e:
         logger.exception(e)
-        t.report_failure(name, e)
+        t.report_failure(name, e, count)
 
 class AllTasks(TaskSet):
     """Entry point for locust"""
