@@ -5,7 +5,7 @@
 all:
   vars:
     remote_user: perforce
-    bench_dir: /hxdepots/benchmark
+    bench_dir: /hxdepots/p4benchmark
     # Number of workers per bench_client
     num_workers: 12
 

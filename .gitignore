@@ -13,5 +13,8 @@
 
 __pycache__/
 
+# Ignore top level config files
+/config_*.yml
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
