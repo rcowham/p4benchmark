@@ -144,23 +144,21 @@ class P4Benchmark(object):
     def getView(self):
         "Randomly select between dirs, or as directed by config file"
         p4config = self.config["perforce"]
-        if p4config["repoSubDir"] == "*":
-            dirs = [x['dir'] for x in self.p4.run_dirs("%s/%s" % (p4config["repoPath"], p4config["repoSubDir"]))]
+        if "*" in p4config["repoPath"]:
+            dirs = [x['dir'] for x in self.p4.run_dirs(p4config["repoPath"])]
         else:
-            dirs = ["%s/%s" % (p4config["repoPath"], p4config["repoSubDir"])]
-        if len(dirs) > 1:
-            dir = random.choice(dirs)
-            if "repoSubDirNum" in p4config and int(p4config["repoSubDirNum"]) > 1:
-                subdirs = [x['dir'] for x in self.p4.run_dirs("%s/*" % dir)]
-                subset = random.sample(subdirs, int(p4config["repoSubDirNum"]))
-                return ["{}/... //{}/{}/...".format(x, self.workspace_name, x.replace("//", "")) for x in subset]
-            else:
-                return ["{}/... //{}/{}/...".format(dir, self.workspace_name, dir.replace("//", ""))]
-        elif len(dirs) == 1:
+            dirs = [p4config["repoPath"]]
+        if len(dirs) == 1:
             dir = dirs[0]
             return ["{}/... //{}/{}/...".format(dir, self.workspace_name, dir.replace("//", ""))]
-        else:
+        if not dirs:
             raise Exception("No dirs found!")
+        if "repoDirNum" in p4config and int(p4config["repoDirNum"]) > 1:
+            subset = random.sample(dirs, int(p4config["repoDirNum"]))
+            return ["{}/... //{}/{}/...".format(x, self.workspace_name, x.replace("//", "")) for x in subset]
+
+        dir = random.choice(dirs)
+        return ["{}/... //{}/{}/...".format(dir, self.workspace_name, dir.replace("//", ""))]
 
     def createWorkspace(self):
         p4config = self.config["perforce"]

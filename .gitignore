@@ -15,6 +15,10 @@ __pycache__/
 
 # Ignore top level config files
 /config_*.yml
+=======
+_testrun/
+log-*.log
+.vscode/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
