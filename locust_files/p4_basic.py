@@ -100,6 +100,7 @@ class AllTasks(TaskSet):
 
     @task(10)
     def basicActions(self):
+        logger.info("Starting basicActions %s" % self.task_name)
         basicActions(self.bench, self.task_name)
         logger.info("Finished %s" % self.task_name)
         self.count += 1
@@ -109,6 +110,7 @@ class AllTasks(TaskSet):
     @task(10)
     def reportingActions(self):
         "Run describe, filelog and fstat"
+        logger.info("Starting reportingActions %s" % self.task_name)
         reportingActions(self.bench, self.task_name)
         logger.info("Finished %s" % self.task_name)
         self.count += 1
