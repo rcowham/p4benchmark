@@ -16,7 +16,7 @@ For more info:
 
 # Background
 
-A customised version of Locust which supports Perforce (and SVN) benchmarking with a configurable
+A customised version of Locust which supports Perforce (and some legacy support for SVN) benchmarking with a configurable
 number of users executing basic tasks (e.g. sync/edit/add/delete/submit).
 
 It performs random numbers of adds/edits/deletes with files which are randomly text or binary
@@ -24,7 +24,7 @@ It performs random numbers of adds/edits/deletes with files which are randomly t
 
 Basic measure in the output is time for parallel syncs of data, and the number of submits/commits per second/minute. Easily extended for more involved benchmarking tasks.
 
-Uses Ansible for working with multiple client machines. Recommend you use the mitogen plugin for improved
+Uses Ansible for working with multiple client machines. Recommend you consider using the mitogen plugin for improved
 speed.
 
 ## Benchmark Goals
@@ -34,7 +34,7 @@ and also different types of storage. The basic idea is to run similar tests agai
 and compare the results. If the configurations differ too much it is hard to draw conclusions.
 
 Installation of Perforce Helix server is typically a manual operation, although we recommend using the
-SDP. This allows for example two or more instances to be setup, e.g. instance 1 with a particular configuration
+[SDP (Server Deployment Package)](https://swarm.workshop.perforce.com/projects/perforce-software-sdp). This allows for example two or more instances to be setup, e.g. instance 1 with a particular configuration
 and instance 2 with the other configuration you want to test.
 
 See the Docker Compose and Dockerfiles for an example of how the SDP is setup.
@@ -129,7 +129,7 @@ This will prompt for password and then do the actions in the script.
 
 # Setting up your Perforce commit instance(s)
 
-It is recommended to use the SDP to configure and start your instance, assignign appropriate storage
+It is recommended to use the SDP to configure and start your instance, assigning appropriate storage etc.
 
 ## Creating repository files
 
@@ -155,7 +155,10 @@ This is a manual step as you need to:
 * create the files within the workspace (using script)
 * submit those files to the server (manually)
 
-Note that it can take hours to perform these steps (though typically only done once).
+RECOMMENDATION: Please use a different p4 user account to submit the files for your base setup. This makes it easy
+to reset your p4d repository by obliterating all changelists belonging to user `bruno` after a benchmark run.
+
+Note that it can take hours to perform these steps (the submitting of a large number of files - though typically only done once).
 
     usage: createfiles.py [-h] [-m MAX] [-l LEVELS [LEVELS ...]] [-s SIZE]
                         [-d ROOTDIR] [-c] [-t] [-b]
@@ -173,15 +176,42 @@ Note that it can take hours to perform these steps (though typically only done o
     -t, --textonly        Only create text files
     -b, --binaryonly      Only create binary files
 
-You can run the script multiple times to generate just binary files, or just text files, or to add more data. It doesn't matter if the randly generate names are duplicates.
+You can run the script multiple times to generate just binary files, or just text files, or to add more data. It doesn't matter if the randomly generated names are duplicates.
 
 E.g.
 
     python3 createfiles.py -l 40 40 -s 100000 -m 20000 -d /tmp/ws --create
 
-Will create the files in `/tmp/ws`
+Will create the files in `/tmp/ws`. You should then make sure the `Root:` of your client workspace points at this directory, and that the
+`View:` mapping is appropriate.
 
 It is easy to spawn multiple jobs in parallel to the same directory to create files faster.
+
+Note that the docker script automates this to some extent:
+
+```
+# Set P4 env
+export P4CLIENT=test_ws
+export P4USER=perforce
+
+# Create a test workspace root dir
+ws_root=/p4/test_ws
+mkdir $ws_root
+cd $ws_root
+
+# Create a client workspace with correct view - will default Root: to current directory
+p4 --field "View=//depot/... //test_ws/..." client -o | p4 client -i
+
+# Create the random test files.
+python3.6 /p4/benchmark/locust_files/createfiles.py -d $ws_root -l 5 5 -c
+
+# Reconcile (to add) and submit them
+p4 rec 
+p4 submit -d "Initial files"
+
+# List changes to confirm success
+p4 changes -t
+```
 
 ### Submitting the files
 
