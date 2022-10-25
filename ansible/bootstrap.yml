@@ -4,7 +4,7 @@
 
 - hosts: '{{ hosts }}'
   remote_user: '{{ user }}'
-  sudo: yes
+  become: true
 
   tasks:
     - name: Create Perforce User account

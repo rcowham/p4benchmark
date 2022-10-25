@@ -9,6 +9,10 @@ RUN yum update -y; \
     yum install -y perl; \
     yum install -y sudo; \
     yum install -y wget; \
+    yum install -y epel-release; \
+    yum install -y gcc; \
+    yum install -y file; \
+    yum group install -y "Development Tools"; \
     echo /usr/local/lib>> /etc/ld.so.conf; \
     echo /usr/lib64>> /etc/ld.so.conf; \
     sed -ie "s/^Defaults[ \t]*requiretty/#Defaults  requiretty/g" /etc/sudoers
@@ -18,11 +22,8 @@ RUN yum install -y openssh-server openssh-clients passwd; \
     ssh-keygen -A
 
 # Python 3.6 plus p4python
-RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm; \
-    yum update; \
-    yum install -y python36u python36u-libs python36u-devel python36u-pip; \
-    ln -s /usr/bin/python3.6 /usr/bin/python3; \
-    ln -s /usr/bin/pip3.6 /usr/bin/pip3;
+RUN yum update -y; \
+    yum install -y python36 python36-libs python36-devel python36-pip python36-devel;
 
 # Create perforce user with UID to 1000 before p4d installation
 RUN useradd --home-dir /p4 --create-home --uid 1000 perforce
@@ -47,19 +48,23 @@ RUN mkdir -p /p4/benchmark; \
 
 ADD locust_files/requirements.txt /p4/benchmark/
 
-RUN pip3.6 install -r /p4/benchmark/requirements.txt
+RUN /usr/bin/pip3.6 install -r /p4/benchmark/requirements.txt
 
 # ==================================================================
 # Dockerfile for master target - builds on the above
 FROM p4bench as p4benchmaster
 
 USER root
-RUN pip3.6 install ansible 
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+RUN /usr/bin/pip3.6 install setuptools-rust; /usr/bin/pip3.6 install --upgrade pip
+RUN /usr/bin/pip3.6 install ansible 
 
 RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     chown -R perforce:perforce /hx*; \
     mkdir -p /hxdepots/reset; \
     cd /hxdepots/reset; \
+    yum install -y cronie; \
     curl -k -s -O https://swarm.workshop.perforce.com/downloads/guest/perforce_software/helix-installer/main/src/reset_sdp.sh; \
     chmod +x reset_sdp.sh; \
     ./reset_sdp.sh -fast -no_ssl -no_sd
