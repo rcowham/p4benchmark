@@ -34,7 +34,8 @@ and also different types of storage. The basic idea is to run similar tests agai
 and compare the results. If the configurations differ too much it is hard to draw conclusions.
 
 Installation of Perforce Helix server is typically a manual operation, although we recommend using the
-[SDP (Server Deployment Package)](https://swarm.workshop.perforce.com/projects/perforce-software-sdp). This allows for example two or more instances to be setup, e.g. instance 1 with a particular configuration
+[SDP (Server Deployment Package)](https://swarm.workshop.perforce.com/projects/perforce-software-sdp). This allows for 
+example two or more instances to be setup, e.g. instance 1 with a particular configuration
 and instance 2 with the other configuration you want to test.
 
 See the Docker Compose and Dockerfiles for an example of how the SDP is setup.
@@ -48,7 +49,7 @@ It is based on CentOS 7 container and does full installation and runs the tests.
 
     docker-compose build
 
-Whick will take 5-10 mins to build the containers (there is a basic one and one for the master server). NOTE - rerquires docker-compose 3.4+ features!
+Whick will take 5-10 mins to build the containers (there is a basic one and one for the master server). NOTE - requires docker-compose 3.4+ features!
 
     docker-compose up
 

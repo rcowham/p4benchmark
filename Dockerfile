@@ -1,4 +1,4 @@
-FROM centos:centos7 as p4bench
+FROM rockylinux:8 as p4bench
 MAINTAINER Robert Cowham "rcowham@perforce.com"
 
 # Common machine configuration (p4bench) - is all that is required for client machines and is
@@ -14,20 +14,23 @@ RUN yum update -y; \
     sed -ie "s/^Defaults[ \t]*requiretty/#Defaults  requiretty/g" /etc/sudoers
 
 RUN yum install -y openssh-server openssh-clients passwd; \
+    yum install -y rpm dnf-plugins-core; \
     yum clean all; \
     ssh-keygen -A
 
-# Python 3.6 plus p4python
-RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm; \
-    yum update; \
-    yum install -y python36u python36u-libs python36u-devel python36u-pip; \
-    ln -s /usr/bin/python3.6 /usr/bin/python3; \
-    ln -s /usr/bin/pip3.6 /usr/bin/pip3;
+# Python plus p4python
+RUN dnf install --assumeyes python38 python38-devel python3-pip; \
+    dnf group install --assumeyes "Development Tools"; \
+    rpm --import https://package.perforce.com/perforce.pubkey; \
+    echo -e "[perforce]\\nname=Perforce\\nbaseurl=https://package.perforce.com/yum/rhel/8/x86_64\\nenabled=1\\ngpgcheck=1\\n" >  /etc/yum.repos.d/perforce.repo; \
+    yum install -y perforce-p4python3
 
 # Create perforce user with UID to 1000 before p4d installation
-RUN useradd --home-dir /p4 --create-home --uid 1000 perforce
+RUN useradd --home-dir /home/perforce --create-home --uid 1000 perforce; \
+    mkdir /p4; \
+    chown perforce:perforce /p4
 RUN echo perforce:perforce | /usr/sbin/chpasswd
-RUN cd /usr/local/bin && wget http://ftp.perforce.com/perforce/r18.2/bin.linux26x86_64/p4 && \
+RUN cd /usr/local/bin && curl -k -s -O http://ftp.perforce.com/perforce/r22.1/bin.linux26x86_64/p4 && \
     chmod +x /usr/local/bin/p4
 
 RUN echo 'perforce ALL=(ALL) NOPASSWD:ALL'> /tmp/perforce; \
@@ -47,14 +50,17 @@ RUN mkdir -p /p4/benchmark; \
 
 ADD locust_files/requirements.txt /p4/benchmark/
 
-RUN pip3.6 install -r /p4/benchmark/requirements.txt
+RUN dnf remove --assumeyes python36 python39
+RUN pip3 install -r /p4/benchmark/requirements.txt
 
 # ==================================================================
 # Dockerfile for master target - builds on the above
 FROM p4bench as p4benchmaster
 
 USER root
-RUN pip3.6 install ansible 
+
+RUN dnf install --assumeyes epel-release; \
+    dnf install --assumeyes ansible
 
 RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     chown -R perforce:perforce /hx*; \
@@ -72,8 +78,10 @@ RUN mkdir -p /p4/benchmark/locust_files; \
 # Log analyzer required
 RUN mkdir /p4/bin; \
     cd /p4/bin; \
-    curl -k -s -O https://swarm.workshop.perforce.com/downloads/guest/perforce_software/log-analyzer/psla/psla/log2sql.py; \
-    chmod +x log2sql.py
+    curl -k -s -O https://github.com/rcowham/go-libp4dlog/releases/download/v0.10.1/log2sql-linux-amd64.gz; \
+    gunzip log2sql-linux-amd64.gz; \
+    mv log2sql-linux-amd64 log2sql; \
+    chmod +x log2sql
 
 ADD locust_files/* /p4/benchmark/locust_files/
 ADD ansible/* /p4/benchmark/ansible/
@@ -81,7 +89,5 @@ ADD utils/* /p4/benchmark/utils/
 ADD hosts /p4/benchmark/
 ADD docker_entry_master.sh /p4/benchmark/
 
-# Optional - this installs node_exporter which is part of Prometheus
-USER root
-
-
+# # Optional - this installs node_exporter which is part of Prometheus
+# USER root

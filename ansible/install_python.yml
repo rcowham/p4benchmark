@@ -20,16 +20,16 @@
     - name: update
       command: yum update -y
 
-    - name: install python 3.6
-      yum:
+    - name: install python 3.8
+      dnf:
         name:
-        - python36u
-        - python36u-pip
-        - python36u-devel
+        - python38
+        - python38-pip
+        - python38-devel
         state: present
 
     - file:
-        src: /usr/bin/python3.6
+        src: /usr/bin/python3.8
         dest: /usr/bin/python3
         mode: 0755
         state: link
@@ -41,5 +41,5 @@
         state: link
 
     - name: Pip install packages
-      command: pip3.6 install p4python==2017.2.1615960 pyaml numpy pyzmq locustio mimesis
+      command: pip3 install pyaml numpy pyzmq locust mimesis
 
