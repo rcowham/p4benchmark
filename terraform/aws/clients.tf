@@ -1,5 +1,9 @@
 
 locals {
+
+  clients_sg_ids   = var.existing_vpc ? concat(var.existing_sg_ids, [module.helix_core_sg.security_group_id]) : [module.helix_core_sg.security_group_id]
+  client_subnet_id = var.existing_vpc ? var.existing_public_subnet : module.vpc.public_subnets[0]
+
   client_user_data = templatefile("${path.module}/../scripts/client_userdata.sh", {
     environment         = var.environment
     ssh_public_key      = tls_private_key.ssh-key.public_key_openssh
@@ -19,8 +23,8 @@ resource "aws_instance" "locust_clients" {
   ami                         = data.aws_ami.rocky.image_id
   instance_type               = var.client_instance_type
   key_name                    = var.key_name
-  vpc_security_group_ids      = [module.helix_core_sg.security_group_id]
-  subnet_id                   = module.vpc.public_subnets[0]
+  vpc_security_group_ids      = local.clients_sg_ids
+  subnet_id                   = local.client_subnet_id
   associate_public_ip_address = true
   user_data                   = local.client_user_data
   monitoring                  = var.monitoring

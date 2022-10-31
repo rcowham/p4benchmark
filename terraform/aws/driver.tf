@@ -1,5 +1,15 @@
 
 locals {
+
+  driver_sg_ids    = var.existing_vpc ? concat(var.existing_sg_ids, [module.driver_sg.security_group_id]) : [module.driver_sg.security_group_id]
+  driver_subnet_id = var.existing_vpc ? var.existing_public_subnet : module.vpc.public_subnets[0]
+
+  helix_core_commit_username = var.existing_helix_core ? var.existing_helix_core_username : var.helix_core_commit_username
+  helix_core_commit_password = var.existing_helix_core ? var.existing_helix_core_password : aws_instance.helix_core[0].id
+  helix_core_private_ip      = var.existing_helix_core ? var.existing_helix_core_ip : aws_instance.helix_core[0].private_ip
+
+
+
   driver_user_data = templatefile("${path.module}/../scripts/driver_userdata.sh", {
     environment                          = var.environment
     locust_client_ips                    = aws_instance.locust_clients.*.private_ip
@@ -12,10 +22,10 @@ locals {
     createfile_size                      = var.createfile_size
     createfile_number                    = var.createfile_number
     createfile_directory                 = var.createfile_directory
-    helix_core_commit_username           = var.helix_core_commit_username
+    helix_core_commit_username           = local.helix_core_commit_username
     helix_core_commit_benchmark_username = var.helix_core_commit_benchmark_username
-    helix_core_password                  = aws_instance.helix_core.id
-    helix_core_private_ip                = aws_instance.helix_core.private_ip
+    helix_core_password                  = local.helix_core_commit_password
+    helix_core_private_ip                = local.helix_core_private_ip
     number_locust_workers                = var.number_locust_workers
     p4benchmark_os_user                  = var.p4benchmark_os_user
 
@@ -30,8 +40,8 @@ resource "aws_instance" "driver" {
   ami                         = data.aws_ami.rocky.image_id
   instance_type               = var.driver_instance_type
   key_name                    = var.key_name
-  vpc_security_group_ids      = [module.driver_sg.security_group_id]
-  subnet_id                   = module.vpc.public_subnets[0]
+  vpc_security_group_ids      = local.driver_sg_ids
+  subnet_id                   = local.driver_subnet_id
   associate_public_ip_address = true
   user_data                   = local.driver_user_data
   monitoring                  = var.monitoring

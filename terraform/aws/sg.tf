@@ -1,3 +1,7 @@
+locals {
+  vpc_id = var.existing_vpc ? var.existing_vpc_id : module.vpc.vpc_id
+}
+
 
 module "helix_core_sg" {
   source  = "terraform-aws-modules/security-group/aws"
@@ -5,7 +9,7 @@ module "helix_core_sg" {
 
   name        = "helix-core-${var.environment}"
   description = "Security group for Helix Core services"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = local.vpc_id
 
   ingress_with_cidr_blocks = [
     {
@@ -56,7 +60,7 @@ module "locust_sg" {
 
   name        = "locust-${var.environment}"
   description = "Security group for Locust services"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = local.vpc_id
 
   ingress_with_cidr_blocks = [
     {
@@ -100,7 +104,7 @@ module "driver_sg" {
 
   name        = "locust-${var.environment}"
   description = "Security group for p4 benchmark driver"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = local.vpc_id
 
   ingress_with_cidr_blocks = [
     {

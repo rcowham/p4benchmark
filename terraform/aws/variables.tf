@@ -12,15 +12,8 @@ variable "vpc_cidr" {
 }
 
 
-
-variable "name" {
-  description = "Name to be used on EC2 instance"
-  type        = string
-  default     = ""
-}
-
 variable "ami" {
-  description = "ID of AMI to use for the instance"
+  description = "AMI ID to use for Helix Core commit server"
   type        = map(string)
   default = {
     "ap-northeast-1" = "ami-01e2129786264c400"
@@ -148,15 +141,15 @@ variable "metadata_volume_iops" {
 }
 
 variable "environment" {
-  description = "Availability Zone EBS volumes we be created in."
+  description = "What environment is this for?  This value will be applied to all resources as a tag"
   type        = string
-  default     = "dev"
+  default     = "test"
 }
 
 
 
 variable "key_name" {
-  description = "Key name of the Key Pair to use for the instance."
+  description = "Key name of the Key Pair to use for all instances."
   type        = string
 }
 
@@ -167,7 +160,7 @@ variable "monitoring" {
 }
 
 variable "private_ip" {
-  description = "Private IP address to associate with the instance in a VPC.  Leave null to allow DHCP to assign IP address."
+  description = "Private IP address to associate with the Helix Core instance in a VPC.  Leave null to allow DHCP to assign IP address."
   type        = string
   default     = null
 }
@@ -187,13 +180,13 @@ variable "ingress_cidrs_1666" {
 }
 
 variable "ingress_cidrs_22" {
-  description = "CIDR blocks to whitelist for SSH access"
+  description = "CIDR blocks to whitelist for Helix Core SSH access"
   type        = string
   default     = ""
 }
 
 variable "ingress_cidrs_locust" {
-  description = "CIDR blocks to whitelist for SSH access"
+  description = "CIDR blocks to whitelist for Locust SSH access"
   type        = string
   default     = ""
 }
@@ -336,4 +329,65 @@ variable "archive_filename" {
   type        = string
   default     = ""
 }
+
+variable "existing_vpc" {
+  description = "Whether or not to use an existing VPC or create one"
+  type        = bool
+  default     = false
+}
+
+variable "existing_helix_core" {
+  description = "Whether or not to use an existing Helix Core or create one"
+  type        = bool
+  default     = false
+}
+
+variable "existing_vpc_id" {
+  description = "Existing VPC ID to use for EC2 deployments"
+  type        = string
+  default     = ""
+}
+
+variable "existing_public_subnet" {
+  description = "Existing public subnet ID to use for EC2 deployments"
+  type        = string
+  default     = ""
+}
+
+variable "existing_az" {
+  description = "Existing Availability Zone to create Helix Core volumes in"
+  type        = string
+  default     = ""
+}
+
+variable "existing_sg_ids" {
+  description = "Existing security group ID to use for network connectivity between locust client machines and Helix Core"
+  type        = list(string)
+  default     = []
+}
+
+variable "existing_helix_core_ip" {
+  description = "Existing helix core IP for locust clients to use for P4PORT"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_port" {
+  description = "Existing helix core port for locust clients to use for P4PORT"
+  type        = string
+  default     = "1666"
+}
+
+variable "existing_helix_core_username" {
+  description = "Existing helix core username for locust clients to use for P4USER"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_password" {
+  description = "Existing helix core password for locust clients to use for p4 login"
+  type        = string
+  default     = ""
+}
+
 

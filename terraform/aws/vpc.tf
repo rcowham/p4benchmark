@@ -5,6 +5,8 @@ locals {
 }
 
 module "vpc" {
+  count = var.existing_vpc ? 0 : 1
+
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.18.0"
 
