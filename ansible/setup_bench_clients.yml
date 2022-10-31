@@ -1,5 +1,6 @@
 - name: Make sure bench clients are OK
   hosts: bench_clients
+  remote_user: '{{ remote_user }}'
   tasks:
 
   - name: Creates directory

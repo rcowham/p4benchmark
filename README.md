@@ -112,7 +112,7 @@ The aim of the bootstrap script is to make ssh possible via key rather than pass
 
 If run with say root access, requiring a password, you can do:
 
-    sudo ansible-playbook -i hosts ansible/bootstrap.yml -k -K --extra-vars "hosts=replicas user=root"
+    ansible-playbook -i hosts ansible/bootstrap.yml --extra-vars "hosts=bench_cleints user=perforce"
 
 This will prompt for password and then do the actions in the script.
 

@@ -1,5 +1,6 @@
 - name: Install monitor scripts on bench_servers
   hosts: bench_servers
+  remote_user: '{{ remote_user }}'
   tasks:
 
   - name: Creates directory

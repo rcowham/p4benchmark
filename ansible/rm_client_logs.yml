@@ -1,5 +1,6 @@
 - name: Remove p4benchmark logs on client
   hosts: bench_clients
+  remote_user: '{{ remote_user }}'
   tasks:
 
     - name: Find files to delete

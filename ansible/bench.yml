@@ -1,5 +1,6 @@
 - name: Run benchmark scripts
   hosts: bench_clients
+  remote_user: '{{ remote_user }}'
   tasks:
 
   - include: set_facts.yml

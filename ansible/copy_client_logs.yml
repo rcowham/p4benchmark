@@ -1,5 +1,6 @@
 - name: Copy client logs after benchmark to monitoring machine
   hosts: bench_clients
+  remote_user: '{{ remote_user }}'
   tasks:
     - name: Find files to copy
       find:

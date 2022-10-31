@@ -1,5 +1,6 @@
 - name: Flush server filesystem caches
   hosts: bench_servers
+  remote_user: '{{ remote_user }}'
   tasks:
 
   - name: Sync filesystem

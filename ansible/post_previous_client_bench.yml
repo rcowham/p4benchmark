@@ -1,5 +1,6 @@
 - name: Tidy up after p4benchmark scripts
   hosts: bench_clients
+  remote_user: '{{ remote_user }}'
   tasks:
 
   - name: Kill locust processes if they exist
