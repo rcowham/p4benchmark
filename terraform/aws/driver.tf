@@ -18,6 +18,7 @@ locals {
     helix_core_private_ip                = aws_instance.helix_core.private_ip
     number_locust_workers                = var.number_locust_workers
     p4benchmark_os_user                  = var.p4benchmark_os_user
+    install_p4prometheus                 = var.install_p4prometheus
 
   })
 }

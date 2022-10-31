@@ -123,5 +123,16 @@ module "driver_sg" {
   ]
 }
 
+resource "aws_security_group_rule" "grafana" {
+  count = var.install_p4prometheus ? 1 : 0
+
+  type              = "ingress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  cidr_blocks       = [var.ingress_cidrs_3000]
+  security_group_id = module.driver_sg.security_group_id
+}
+
 
 

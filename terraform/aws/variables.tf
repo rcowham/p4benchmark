@@ -198,6 +198,12 @@ variable "ingress_cidrs_locust" {
   default     = ""
 }
 
+variable "ingress_cidrs_3000" {
+  description = "CIDR blocks to whitelist for Grafana access"
+  type        = string
+  default     = ""
+}
+
 
 
 
@@ -337,3 +343,8 @@ variable "archive_filename" {
   default     = ""
 }
 
+variable "install_p4prometheus" {
+  description = "Wether or not to install p4prometheus on the driver EC2 instance"
+  type        = bool
+  default     = true
+}

@@ -21,7 +21,6 @@ chmod 600 /ssh_private_key
 eval `ssh-agent -s`
 ssh-add /ssh_private_key
 
-
 cat << EOF > /etc/yum.repos.d/perforce.repo
 [Perforce]
 name=Perforce
@@ -32,9 +31,7 @@ EOF
 
 rpm --import https://package.perforce.com/perforce.pubkey
 
-yum install -y helix-p4d perforce-p4python3
-
-
+yum install -y helix-p4d perforce-p4python3 wget jq vim
 
 #yum update -y
 yum group install -y "Development Tools"
@@ -161,3 +158,58 @@ perforce:
 
 EOF
 
+
+if [[ "${install_p4prometheus}" == "true" ]]; then
+    echo "Installation of p4prometheus is included"
+
+    cd /tmp/
+    wget https://raw.githubusercontent.com/perforce/p4prometheus/master/scripts/install_prom_graf.sh
+    chmod +x install_prom_graf.sh
+    ./install_prom_graf.sh
+
+cat << EOF > /etc/prometheus/prometheus.yml
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration - optional
+# alerting:
+#   alertmanagers:
+#   - static_configs:
+#     - targets:
+#         - localhost:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+# rule_files:
+  # - "perforce_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+
+  - job_name: 'node_exporter'
+    static_configs:
+    ############################################################
+    # CONFIGURE THESE VALUES AS APPROPRIATE FOR YOUR SERVERS!!!!
+    ############################################################
+    - targets: 
+        - ${helix_core_private_ip}:9100
+
+EOF
+
+    export GRAFANA_SERVER=http://localhost:3000
+    export GRAFANA_ADMIN_API_KEY=$(curl -X POST -H "Content-Type: application/json" -d '{"name":"apikeycurl", "role": "Admin"}' http://admin:admin@localhost:3000/api/auth/keys | jq -r -c '.key')
+
+    wget https://raw.githubusercontent.com/perforce/p4prometheus/master/scripts/create_dashboard.py
+    chmod +x create_dashboard.py
+    wget https://raw.githubusercontent.com/perforce/p4prometheus/master/scripts/dashboard.yaml
+    pip3 install grafanalib requests
+    pip3 install --ignore-installed PyYAML
+
+    ./create_dashboard.py --title "P4Prometheus" --url $GRAFANA_SERVER --api-key $GRAFANA_ADMIN_API_KEY
+
+fi
