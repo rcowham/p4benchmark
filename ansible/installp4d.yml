@@ -1,4 +1,4 @@
-- name: Make sure p4 command line is present
+- name: Make sure p4d command is present
   hosts: replicas
   var:
     bin_dir: /home/perforce/bin
@@ -10,6 +10,6 @@
 
      - name: Download p4d
        get_url:
-         url:  ftp://ftp.perforce.com/perforce/r18.1/bin.linux26x86_64/p4d
+         url:  ftp://ftp.perforce.com/perforce/r22.1/bin.linux26x86_64/p4d
          dest: {{bin_dir}}
          mode: 0755

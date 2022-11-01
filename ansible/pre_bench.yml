@@ -1,4 +1,4 @@
-- name: Install p4benchmark scripts
+- name: Install p4benchmark scripts prior to running benchmark
   hosts: bench_clients
   tasks:
 

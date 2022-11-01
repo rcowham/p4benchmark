@@ -1,9 +1,10 @@
-- name: Install p4benchmark scripts
+- name: Copy client logs after benchmark to monitoring machine
   hosts: bench_clients
   tasks:
     - name: Find files to copy
       find:
         paths: "{{bench_dir}}"
+        # Note pattern is as specified in run_worker.sh
         patterns: worker*.out
       register: files_to_copy
 

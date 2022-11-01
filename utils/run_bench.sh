@@ -48,7 +48,7 @@ sed -e "s/:1666/:${instance}666/" < locust_files/$config_file > $config_file
 
 rm logs/*worker*.out
 echo "Removing remote logs..."
-ansible-playbook -i hosts ansible/rm_logs.yml > /dev/null
+ansible-playbook -i hosts ansible/rm_client_logs.yml > /dev/null
 ansible-playbook -i hosts ansible/post_bench.yml
 ansible-playbook -i hosts ansible/pre_bench.yml
 

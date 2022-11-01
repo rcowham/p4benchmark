@@ -23,10 +23,6 @@ echo "Creating $rundir"
 echo "Copying logs..."
 ansible-playbook -i hosts ansible/copy_logs.yml > /dev/null
 
-# For edge servers this might be useful
-# ansible-playbook -i hosts ansible/copy_monitor_logs.yml
-# ansible-playbook -i hosts ansible/stop_monitoring.yml
-
 mkdir $rundir
 config_file=$(ls -tr $P4BENCH_HOME/config_p4_* | tail -1)
 pushd $rundir
@@ -82,8 +78,8 @@ do
   ssh $h mv /p4/$instance/logs/log /p4/$instance/logs/log.old
 done
 
-# Analyse logs into sql db
-~/bin/log2sql.py -d run log
+# Analyse logs into sql db - uses log2sql from https://github.com/rcowham/go-libp4dlog/releases
+~/bin/log2sql -d run log
 for h in $edges
 do
   [[ -e $h-edge.log ]] && ~/bin/log2sql.py -d run $h-edge.log

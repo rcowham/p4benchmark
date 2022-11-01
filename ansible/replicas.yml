@@ -9,7 +9,6 @@
       mode: 0755
     with_fileglob:
     - "{{bench_dir}}/run_monitor.sh"
-    - "{{bench_dir}}/run_iftop.sh"
 
   - command:  "{{bench_dir}}/run_monitor.sh"
     args:
