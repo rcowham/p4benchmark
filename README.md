@@ -161,6 +161,7 @@ to reset your p4d repository by obliterating all changelists belonging to user `
 
 Note that it can take hours to perform these steps (the submitting of a large number of files - though typically only done once).
 
+```
     usage: createfiles.py [-h] [-m MAX] [-l LEVELS [LEVELS ...]] [-s SIZE]
                         [-d ROOTDIR] [-c] [-t] [-b]
 
@@ -176,6 +177,7 @@ Note that it can take hours to perform these steps (the submitting of a large nu
                             names
     -t, --textonly        Only create text files
     -b, --binaryonly      Only create binary files
+```
 
 You can run the script multiple times to generate just binary files, or just text files, or to add more data. It doesn't matter if the randomly generated names are duplicates.
 
@@ -300,6 +302,8 @@ When the benchmark has finished:
 
 This creates a new directory under `./run/` and copies relevant log files from the worker (client) machines, as well as the replicas (if used). 
 At the end it will run the log2sql.py log analysis script to create a Sqlite database, and then run some queries on that database.
+
+It uses `log2sql` from https://github.com/rcowham/go-libp4dlog/releases
 
 It also saves various configuration values, so that you can compare
 and contrast the results of different configurations with
