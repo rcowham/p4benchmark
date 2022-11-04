@@ -21,9 +21,11 @@ RUN yum install -y openssh-server openssh-clients passwd; \
 # Python plus p4python
 RUN dnf install --assumeyes python38 python38-devel python3-pip; \
     dnf group install --assumeyes "Development Tools"; \
-    rpm --import https://package.perforce.com/perforce.pubkey; \
+    rpm --import https://package.perforce.com/perforce.pubkey
+
+RUN yum update; \
     echo -e "[perforce]\\nname=Perforce\\nbaseurl=https://package.perforce.com/yum/rhel/8/x86_64\\nenabled=1\\ngpgcheck=1\\n" >  /etc/yum.repos.d/perforce.repo; \
-    yum install -y perforce-p4python3
+    yum install -y perforce-p4python3-python3.8
 
 # Create perforce user with UID to 1000 before p4d installation
 RUN useradd --home-dir /home/perforce --create-home --uid 1000 perforce; \
@@ -32,15 +34,16 @@ RUN useradd --home-dir /home/perforce --create-home --uid 1000 perforce; \
 RUN echo perforce:perforce | /usr/sbin/chpasswd
 RUN cd /usr/local/bin && curl -k -s -O http://ftp.perforce.com/perforce/r22.1/bin.linux26x86_64/p4 && \
     chmod +x /usr/local/bin/p4
+RUN echo "source /p4/common/bin/p4_vars 1" >> /home/perforce/.bashrc
 
 RUN echo 'perforce ALL=(ALL) NOPASSWD:ALL'> /tmp/perforce; \
     chmod 0440 /tmp/perforce; \
     chown root:root /tmp/perforce; \
     mv /tmp/perforce /etc/sudoers.d
 
-ADD utils/insecure_ssh_key.pub /tmp
-ADD utils/insecure_ssh_key /tmp
-ADD utils/setup_ssh.sh /tmp
+ADD docker/insecure_ssh_key.pub /tmp
+ADD docker/insecure_ssh_key /tmp
+ADD docker/setup_ssh.sh /tmp
 
 RUN /bin/bash -x /tmp/setup_ssh.sh && rm /tmp/*ssh*
 EXPOSE 22
@@ -53,6 +56,9 @@ ADD locust_files/requirements.txt /p4/benchmark/
 RUN dnf remove --assumeyes python36 python39
 RUN pip3 install -r /p4/benchmark/requirements.txt
 
+# Allow ssh from user perforce
+RUN rm /run/nologin
+
 # ==================================================================
 # Dockerfile for master target - builds on the above
 FROM p4bench as p4benchmaster
@@ -60,7 +66,9 @@ FROM p4bench as p4benchmaster
 USER root
 
 RUN dnf install --assumeyes epel-release; \
-    dnf install --assumeyes ansible
+    dnf install --assumeyes ansible; \
+    dnf install --assumeyes cronie; \
+    dnf install --assumeyes sqlite
 
 RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     chown -R perforce:perforce /hx*; \
@@ -68,7 +76,7 @@ RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     cd /hxdepots/reset; \
     curl -k -s -O https://swarm.workshop.perforce.com/downloads/guest/perforce_software/helix-installer/main/src/reset_sdp.sh; \
     chmod +x reset_sdp.sh; \
-    ./reset_sdp.sh -fast -no_ssl -no_sd
+    ./reset_sdp.sh -fast -no_ssl -no_sd -no_tweaks
 
 USER perforce
 RUN mkdir -p /p4/benchmark/locust_files; \
@@ -76,9 +84,9 @@ RUN mkdir -p /p4/benchmark/locust_files; \
     mkdir -p /p4/benchmark/utils
 
 # Log analyzer required
-RUN mkdir /p4/bin; \
-    cd /p4/bin; \
-    curl -k -s -O https://github.com/rcowham/go-libp4dlog/releases/download/v0.10.1/log2sql-linux-amd64.gz; \
+RUN mkdir /home/perforce/bin; \
+    cd /home/perforce/bin; \
+    wget -q https://github.com/rcowham/go-libp4dlog/releases/download/v0.10.1/log2sql-linux-amd64.gz; \
     gunzip log2sql-linux-amd64.gz; \
     mv log2sql-linux-amd64 log2sql; \
     chmod +x log2sql

@@ -1,17 +1,19 @@
 general:
     min_wait: 100
     max_wait: 100
-    workspace_root:  /hxdepots/work
+    workspace_root:  /p4/work
 
 # Perforce benchmark testing parameters
 # Specify password if required
 perforce:
     # Array of ports - can include ssl prefix. Allows for random selection of edge servers
-    port:       
-    - ssl:10.0.0.181:1666
+    port:
+    - master:1666
+    # - ssl:10.0.0.181:1666
     user:       bruno
     charset:
-    password:   "my!Password"
+    # password:   "my!Password"
+    password:   
     options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
     sync_progress_size_interval: 100 * 1000 * 1000
     # repoPath: should not include trailing /...

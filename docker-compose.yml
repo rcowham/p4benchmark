@@ -14,6 +14,10 @@ services:
     networks:
       - p4bench
     tty: true
+    networks:
+      p4bench:
+        aliases:
+          - perforce
 
   client1: 
     build:

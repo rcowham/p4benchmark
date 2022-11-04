@@ -21,10 +21,12 @@ mv p4_1.vars p4_1.vars.old
 cat p4_1.vars.old | sed -e 's/1999/1666/' > p4_1.vars
 
 # Start the server - some issues with doing sysctl in docker so we do it old way
-/p4/1/bin/p4d_1_init start
+export OS_INIT_MECHANISM=systemd
+/p4/1/bin/p4d_1_init start &
+sleep 2
 
 # Set configurables - but without restarting server
-. /p4/common/bin/p4_vars 1
+source /p4/common/bin/p4_vars 1
 p4 configure set server.depot.root=/p4/1/depots
 p4 configure set journalPrefix=/p4/1/checkpoints/p4_1
 p4 configure set track=1
@@ -38,7 +40,7 @@ ws_root=/p4/test_ws
 mkdir $ws_root
 cd $ws_root
 p4 --field "View=//depot/... //test_ws/..." client -o | p4 client -i
-python3.6 /p4/benchmark/locust_files/createfiles.py -d $ws_root -l 5 5 -c
+python3 /p4/benchmark/locust_files/createfiles.py -d $ws_root -l 5 5 -c
 p4 rec 
 p4 submit -d "Initial files"
 p4 changes -t
@@ -66,6 +68,6 @@ sleep 10
 
 echo "Waiting for 10 minutes (in case you want to have a look at the machine config etc)"
 echo "If so, run:"
-echo "    docker exec -ti benchmark_pb_master_1 /bin/bash"
+echo "    docker exec -ti p4benchmark_master_1 /bin/bash"
 echo "Otherwise Ctrl+C to finish"
 sleep 600

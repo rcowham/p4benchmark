@@ -41,7 +41,6 @@ instance=${port:0:1}
 # edges="sn1-r720-a02-15 sn1-r720-a02-17 sn1-r720-a02-19"
 edges=""
 
-cp $P4BENCH_HOME/nethogs.out .
 [[ -e $P4BENCH_HOME/ps.out ]] && mv $P4BENCH_HOME/ps.out .
 [[ -e $P4BENCH_HOME/change_counter.out ]] && mv $P4BENCH_HOME/change_counter.out .
 [[ -e $P4BENCH_HOME/network.out ]] && mv $P4BENCH_HOME/network.out .
