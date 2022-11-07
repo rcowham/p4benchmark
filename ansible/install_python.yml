@@ -1,4 +1,4 @@
-- name: Transfer and execute a script to install python.
+- name: Transfer and execute a script to install python - valid for Rocky Linux 8
   hosts: bench_clients
   become: yes
   tasks:
@@ -11,14 +11,17 @@
     - name: clean
       command: yum clean -y all
 
-    - name: install repos
-      yum:
-        name:
-        - https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-        - https://centos7.iuscommunity.org/ius-release.rpm
+    - name: Add Perforce repo
+      ansible.builtin.yum_repository:
+        name: Perforce
+        description: Perforce YUM repo
+        file: perforce
+        baseurl: https://package.perforce.com/yum/rhel/8/x86_64
+        gpgcheck: yes
+        enabled: yes
 
     - name: update
-      command: yum update -y
+      command: yum update -y && dnf install -y epel-release
 
     - name: install python 3.8
       dnf:
@@ -26,6 +29,7 @@
         - python38
         - python38-pip
         - python38-devel
+        - perforce-p4python3-python3.8
         state: present
 
     - file:
@@ -34,12 +38,12 @@
         mode: 0755
         state: link
 
-    - file:
-        src: /usr/bin/pip3.6
-        dest: /usr/bin/pip3
-        mode: 0755
-        state: link
+    # - file:
+    #     src: /usr/bin/pip3.
+    #     dest: /usr/bin/pip3
+    #     mode: 0755
+    #     state: link
 
-    - name: Pip install packages
+    - name: Pip install packages for Locust and benchmark tools
       command: pip3 install pyaml numpy pyzmq locust mimesis
 
