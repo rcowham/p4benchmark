@@ -8,9 +8,6 @@ P4BENCH_UTILS="$P4BENCH_HOME/utils"
 
 cd $P4BENCH_HOME
 
-tpid=$(pgrep run_top)
-[[ $tpid -eq 0 ]] || kill $tpid
-
 NETWORK_LOG=network.out
 [[ -e ps.out ]] && sudo rm ps.out
 [[ -e $NETWORK_LOG ]] && sudo rm $NETWORK_LOG

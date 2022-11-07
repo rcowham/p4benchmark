@@ -8,6 +8,9 @@ parent_dir="$(cd "$script_dir/.."; pwd -P)"
 P4BENCH_HOME=${P4BENCH_HOME:-$parent_dir}
 cd $P4BENCH_HOME
 
+export P4BENCH_CLIENT_USER=$(grep "p4bench_client_user" hosts | awk '{print $2}')
+export P4BENCH_SETUP_USER=$(grep "p4bench_setup_user" hosts | awk '{print $2}')
+
 config_file=$(ls -tr config_p4_* | tail -1)
 p4port=`grep 666 $config_file | head -1 | sed -e 's/\s*port:\s*//' | sed -e 's/ \- //'`
 p4user=`grep user $config_file | sed -e 's/\s*user:\s*//'`
@@ -22,7 +25,7 @@ do
     count=0
     for h in $hosts
     do
-        cnt=$(p4 -p $h:1666 -u perforce monitor show | grep -v monitor | grep -v rmt-Journal | grep -v pull | wc -l)
+        cnt=$(p4 -p $h:1666 -u "$P4BENCH_SETUP_USER" monitor show | grep -v monitor | grep -v rmt-Journal | grep -v pull | wc -l)
         echo $h $cnt
         count=$(($count + $cnt))
     done

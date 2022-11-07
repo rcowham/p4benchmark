@@ -6,11 +6,8 @@
     shell: pkill --full 'locust' || true
     ignore_errors: yes
 
-  - name: Remove base directory which has workspaces - see config_p4_bench.yml
+  - name: Remove base directory which has client workspaces
     file:
-      # path: /ram/disk/ws
-      path: /home/p4/ws
-      # path: /p4ws/p4/ws
-      # path: /p4ws_new/p4/ws
+      path: "{{workspace_common_dir}}"
       state: absent
 

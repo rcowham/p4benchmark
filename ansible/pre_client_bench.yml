@@ -15,9 +15,9 @@
         - "{{bench_dir}}/utils/run_worker.sh"
         - "{{bench_dir}}/bench_p4config.txt"
 
-    - name: Create a directory for perforce workspaces on /home
+    - name: Create a directory for all perforce workspaces
       file:
-        path: /home/p4
+        path: "{{workspace_common_dir}}"
         state: directory
         owner: perforce
       become: true

@@ -1,0 +1,15 @@
+- name: Run benchmark scripts
+  hosts: bench_clients
+  tasks:
+
+  - include: set_facts.yml
+
+  - name: Run worker
+    shell: bash -x run_worker.sh
+    args:
+      chdir: "{{ bench_dir }}"
+    environment:
+      P4BENCH_NUM_WORKERS: "{{ num_workers }}"
+      P4BENCH_SCRIPT: "{{ p4bench_script }}"
+      P4BENCH_HOST: "{{ p4bench_host }}"
+
