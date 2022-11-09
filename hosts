@@ -14,12 +14,17 @@ all:
     p4bench_client_user: bruno
     # The p4user account used for setting up repository
     p4bench_setup_user: perforce
+    # The perforce SDP instance
+    sdp_instance: 1
+    # The port to use
+    p4port: 1666
     # Number of workers per bench_client
     num_workers: 12
 
   children:
-    # replicas:
-    #  hosts:
+    bench_servers:
+      hosts:
+        master
     bench_clients:
       hosts:
         client1:

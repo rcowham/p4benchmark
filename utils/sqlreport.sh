@@ -133,25 +133,10 @@ grep workspace_root config_p4_*.yml | grep -v "#"
 
 echo ""
 echo "Workspace sizes on commit (for cross check)"
-echo "Client: Files Size"
+echo "Client:"
+echo "Files Size"
 cat client_sizes*.txt | awk '{f += $2; s += $4+0} END { printf "%d %.2fG\n", f, s;}'
 
 cat changes.out
-
-function getstats() {
-    nic=$1
-    rx=$(grep -A7 "$nic:" network.out | grep "RX packets" | awk 'FNR==1{s = $5} FNR==2{e = $5} END {gb=1024*1024*1024; printf "%.2f", (e - s) / gb}')
-    tx=$(grep -A7 "$nic:" network.out | grep "TX packets" | awk 'FNR==1{s = $5} FNR==2{e = $5} END {gb=1024*1024*1024; printf "%.2f", (e - s) / gb}')
-    echo "$nic: RX ${rx}G TX ${tx}G"
-}
-
-echo ""
-# NICs to analyse
-# nics="bond0 enp66s0 enp66s0d1"
-nics="eth0"
-for nic in $nics
-do
-    getstats $nic
-done
 
 echo ""

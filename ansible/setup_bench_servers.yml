@@ -1,5 +1,5 @@
-- name: Install replica scripts
-  hosts: replicas
+- name: Install monitor scripts on bench_servers
+  hosts: bench_servers
   tasks:
 
   - name: Creates directory

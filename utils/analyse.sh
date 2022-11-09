@@ -2,10 +2,6 @@
 
 function bail () { echo "\nError: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 
-# Analyse using next available directory
-#runid=${1:-Unset}
-#[[ $runid == "Unset" ]] && bail "Specify runid as parameter"
-
 # Get common root dir
 script_dir="${0%/*}"
 parent_dir="$(cd "$script_dir/.."; pwd -P)"
@@ -19,9 +15,11 @@ rundir=$P4BENCH_HOME/run/$runid
 
 echo "Creating $rundir"
 
-# copy client logs just in case useful
+# copy logs - server logs for analysis and clients just in case
 echo "Copying logs..."
-ansible-playbook -i hosts ansible/copy_logs.yml > /dev/null
+ansible-playbook -i hosts ansible/copy_server_logs.yml > /dev/null
+ansible-playbook -i hosts ansible/copy_client_logs.yml > /dev/null
+ansible-playbook -i hosts ansible/rm_server_logs.yml > /dev/null
 
 mkdir $rundir
 config_file=$(ls -tr $P4BENCH_HOME/config_p4_* | tail -1)
@@ -41,13 +39,13 @@ instance=${port:0:1}
 # edges="sn1-r720-a02-15 sn1-r720-a02-17 sn1-r720-a02-19"
 edges=""
 
-[[ -e $P4BENCH_HOME/ps.out ]] && mv $P4BENCH_HOME/ps.out .
 [[ -e $P4BENCH_HOME/change_counter.out ]] && mv $P4BENCH_HOME/change_counter.out .
-[[ -e $P4BENCH_HOME/network.out ]] && mv $P4BENCH_HOME/network.out .
-[[ -e $P4BENCH_HOME/loadavg.out ]] && mv $P4BENCH_HOME/loadavg.out .
 kill $(pgrep run_top)
 cp $P4BENCH_HOME/logs/*worker* .
 gzip *worker*.out &
+
+# Master/edge logs
+cp $P4BENCH_HOME/logs/*-log .
 
 # Record sizes of clients
 $p4 clients -e bruno* |cut -d " " -f 2| while read c; do $p4 -c $c sizes -sh //$c/... >> client_sizes.txt; done
@@ -70,7 +68,6 @@ echo "Submitted change start $start_chg end $end_chg" > changes.out
 echo "Count: $chgs" >> changes.out
 
 # Get logs from master server instance(s)
-sudo mv /p4/$instance/logs/log .
 for h in $edges
 do
   scp $h:/p4/$instance/logs/log $h-edge.log
@@ -78,10 +75,6 @@ do
 done
 
 # Analyse logs into sql db - uses log2sql from https://github.com/rcowham/go-libp4dlog/releases
-~/bin/log2sql -d run log
-for h in $edges
-do
-  [[ -e $h-edge.log ]] && ~/bin/log2sql.py -d run $h-edge.log
-done
+~/bin/log2sql -d run *-log
 
 $P4BENCH_UTILS/sqlreport.sh $rundir

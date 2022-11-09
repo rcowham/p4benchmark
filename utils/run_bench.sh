@@ -19,7 +19,6 @@ cd $P4BENCH_HOME
 
 instance=${1:-Unset}
 [[ $instance == "Unset" ]] && bail "Specify instance as parameter"
-[[ ! -d /p4/$instance/logs ]] && bail "Instance $instance not found: /p4/$instance/logs"
 
 P4BENCH_SCRIPT=${2:-Unset}
 [[ $P4BENCH_SCRIPT == "Unset" ]] && bail "Specify P4BENCH_SCRIPT as second parameter"
@@ -51,6 +50,7 @@ sed -e "s/:1666/:${instance}666/" < locust_files/$config_file > $config_file
 rm logs/*worker*.out
 echo "Removing remote logs..."
 ansible-playbook -i hosts ansible/rm_client_logs.yml > /dev/null
+ansible-playbook -i hosts ansible/rm_server_logs.yml > /dev/null
 ansible-playbook -i hosts ansible/post_previous_client_bench.yml
 ansible-playbook -i hosts ansible/pre_client_bench.yml
 
@@ -58,9 +58,10 @@ ansible-playbook -i hosts ansible/pre_client_bench.yml
 sudo sync
 sudo bash -c 'echo 3 > /proc/sys/vm/drop_caches'
 
-$P4BENCH_UTILS/run_master.sh
+# Run the locust master - waiting for clients to connect
+$P4BENCH_UTILS/run_locust_master.sh
 ansible-playbook -i hosts ansible/client_bench.yml
 
-echo "Running monitor jobs in background"
-$P4BENCH_UTILS/run_monitor.sh &
+# echo "Running monitor jobs in background"
+# $P4BENCH_UTILS/run_monitor.sh &
 echo ""

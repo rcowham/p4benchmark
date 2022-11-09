@@ -60,15 +60,12 @@ RUN pip3 install -r /p4/benchmark/requirements.txt
 RUN rm /run/nologin
 
 # ==================================================================
-# Dockerfile for master target - builds on the above
+# Dockerfile for master/commit target - builds on the above
 FROM p4bench as p4benchmaster
 
 USER root
 
-RUN dnf install --assumeyes epel-release; \
-    dnf install --assumeyes ansible; \
-    dnf install --assumeyes cronie; \
-    dnf install --assumeyes sqlite
+RUN dnf install --assumeyes cronie nc
 
 RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     chown -R perforce:perforce /hx*; \
@@ -78,10 +75,38 @@ RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     chmod +x reset_sdp.sh; \
     ./reset_sdp.sh -fast -no_ssl -no_sd -no_tweaks
 
+# Replace systemctl for use within docker
+RUN cd /usr/local/bin; \
+    wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl3.py; \
+    chmod 755 systemctl3.py; \
+    cd /usr/local/bin; \
+    mv systemctl systemctl.old; \
+    ln -s /usr/local/bin/systemctl3.py systemctl; \
+    cd /usr/bin; \
+    mv systemctl systemctl.old; \
+    ln -s /usr/local/bin/systemctl3.py systemctl
+
 USER perforce
-RUN mkdir -p /p4/benchmark/locust_files; \
-    mkdir -p /p4/benchmark/ansible; \
-    mkdir -p /p4/benchmark/utils
+
+RUN mkdir -p /p4/benchmark/locust_files
+
+ADD locust_files/* /p4/benchmark/locust_files/
+
+ADD docker/docker_entry_master.sh /p4/benchmark
+
+# Make sure that sshd can run
+USER root
+
+# ==================================================================
+# Dockerfile for benchmark driver target - builds on the base
+FROM p4bench as p4benchdriver
+
+USER root
+
+RUN dnf install --assumeyes epel-release; \
+    dnf install --assumeyes ansible; \
+    dnf install --assumeyes cronie; \
+    dnf install --assumeyes sqlite nc
 
 # Log analyzer required
 RUN mkdir /home/perforce/bin; \
@@ -91,11 +116,14 @@ RUN mkdir /home/perforce/bin; \
     mv log2sql-linux-amd64 log2sql; \
     chmod +x log2sql
 
+USER perforce
+
+RUN mkdir -p /p4/benchmark/locust_files; \
+    mkdir -p /p4/benchmark/ansible; \
+    mkdir -p /p4/benchmark/utils
+
 ADD locust_files/* /p4/benchmark/locust_files/
 ADD ansible/* /p4/benchmark/ansible/
 ADD utils/* /p4/benchmark/utils/
 ADD hosts /p4/benchmark/
-ADD docker_entry_master.sh /p4/benchmark/
-
-# # Optional - this installs node_exporter which is part of Prometheus
-# USER root
+ADD docker/docker_entry_p4bench.sh /p4/benchmark/

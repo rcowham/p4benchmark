@@ -2,50 +2,61 @@ version: '3.4'
 
 services:
 
-  master: 
+  p4bench: # Benchmark driver machine
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
+      target: p4benchdriver
+    hostname: p4bench
+    command: /usr/sbin/sshd -D
+    privileged: true
+    entrypoint: /p4/benchmark/docker_entry_p4bench.sh
+    tty: true
+    networks:
+      - nw_p4bench
+
+  master: # Commit server
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
       target: p4benchmaster
     hostname: master
     command: /usr/sbin/sshd -D
     privileged: true
-    entrypoint: /p4/benchmark/docker_entry_master.sh
-    networks:
-      - p4bench
+    # entrypoint: /usr/sbin/sshd && /p4/benchmark/docker_entry_master.sh
     tty: true
     networks:
-      p4bench:
+      nw_p4bench:
         aliases:
           - perforce
 
-  client1: 
+  client1: # client machine
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
       target: p4bench
     hostname: client1
     command: /usr/sbin/sshd -D
     networks:
-      - p4bench
+      - nw_p4bench
     tty: true
     depends_on:
       - master
 
-  client2: 
+  client2: # client machine
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
       target: p4bench
     hostname: client2
     command: /usr/sbin/sshd -D
     networks:
-      - p4bench
+      - nw_p4bench
     tty: true
     depends_on:
       - master
 
 networks:
 
-  p4bench:
+  nw_p4bench:
     driver: bridge

@@ -1,0 +1,16 @@
+- name: Copy server logs after benchmark to monitoring machine
+  hosts: bench_servers
+  tasks:
+    - name: Find files to copy
+      find:
+        paths: "/p4/{{sdp_instance}}/logs"
+        # Note pattern is as specified in run_worker.sh
+        patterns: log*
+      register: files_to_copy
+
+    - name: Copy log files
+      fetch:
+        src: "{{item.path}}"
+        dest: "{{bench_dir}}/logs/{{inventory_hostname}}-{{item.path | basename}}"
+        flat: yes
+      with_items: "{{files_to_copy.files}}"

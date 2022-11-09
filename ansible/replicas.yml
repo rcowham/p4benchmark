@@ -1,5 +1,5 @@
 - name: Run p4benchmark stuff for replicas
-  hosts: replicas
+  hosts: bench_servers
   tasks:
 
   - name: Copy relevant monitoring files
