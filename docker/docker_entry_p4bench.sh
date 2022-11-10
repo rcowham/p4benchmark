@@ -16,7 +16,7 @@ elif [[ $(id -u -n) != $OSUSER ]]; then
 fi
 
 echo "Starting up master server"
-ssh master /p4/benchmark/docker_entry_master.sh &
+ssh master /p4/benchmark/docker_entry_master.sh
 
 # Wait for p4d to be running
 echo "Waiting for master server to be running"

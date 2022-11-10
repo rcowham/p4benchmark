@@ -28,6 +28,7 @@ export P4BENCH_SCRIPT=${3:-$P4BENCH_SCRIPT}
 
 total_workers=$(($P4BENCH_NUM_HOSTS * $P4BENCH_NUM_WORKERS_PER_HOST))
 
-# pkill -9 locust
+# This will commit suicide!
+pkill -9 "^locust$"
 
 nohup locust -f locust_files/p4_${P4BENCH_SCRIPT}.py --master --headless --expect-workers=$total_workers --users $total_workers -r $total_workers > master.out 2>&1 &
