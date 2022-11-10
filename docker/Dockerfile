@@ -55,6 +55,9 @@ ADD locust_files/requirements.txt /p4/benchmark/
 
 RUN dnf remove --assumeyes python36 python39
 RUN pip3 install -r /p4/benchmark/requirements.txt
+# Useful for parsing YAML in bash
+RUN dnf install --assumeyes jq
+RUN pip3 install yq
 
 # Allow ssh from user perforce
 RUN rm /run/nologin
@@ -125,5 +128,5 @@ RUN mkdir -p /p4/benchmark/locust_files; \
 ADD locust_files/* /p4/benchmark/locust_files/
 ADD ansible/* /p4/benchmark/ansible/
 ADD utils/* /p4/benchmark/utils/
-ADD hosts /p4/benchmark/
+ADD hosts.docker.yaml /p4/benchmark/
 ADD docker/docker_entry_p4bench.sh /p4/benchmark/

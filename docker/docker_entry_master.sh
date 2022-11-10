@@ -16,20 +16,21 @@ elif [[ $(id -u -n) != $OSUSER ]]; then
 fi
 
 # Change default port as installed by reset_sdp.sh
+sdpinstance=1
 cd /p4/common/config
-mv p4_1.vars p4_1.vars.old
-cat p4_1.vars.old | sed -e 's/1999/1666/' > p4_1.vars
+mv "p4_$sdpinstance.vars" "p4_$sdpinstance.vars.old"
+cat "p4_$sdpinstance.vars.old" | sed -e 's/1999/1666/' > "p4_$sdpinstance.vars"
 
 # Start the server - some issues with doing sysctl in docker so we do it old way
-sudo systemctl start p4d_1
+sudo systemctl start "p4d_$sdpinstance"
 
 echo "Waiting for master server to be running"
 until nc -zw 1 localhost 1666; do sleep 1; done && sleep 1
 
 # Set configurables - but without restarting server
-source /p4/common/bin/p4_vars 1
-p4 configure set server.depot.root=/p4/1/depots
-p4 configure set journalPrefix=/p4/1/checkpoints/p4_1
+source /p4/common/bin/p4_vars "$sdpinstance"
+p4 configure set server.depot.root="/p4/$sdpinstance/depots"
+p4 configure set journalPrefix="/p4/$sdpinstance/checkpoints/p4_$sdpinstance"
 p4 configure set track=1
 p4 configure set monitor=2
 p4 configure show

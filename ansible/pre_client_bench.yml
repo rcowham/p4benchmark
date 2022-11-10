@@ -14,6 +14,7 @@
         - "{{bench_dir}}/locust_files/*.py"
         - "{{bench_dir}}/utils/run_locust_worker.sh"
         - "{{bench_dir}}/bench_p4config.txt"
+        - "{{bench_dir}}/{{ lookup('env', 'ANSIBLE_HOSTS') }}"
 
     - name: Create a directory for all perforce workspaces
       file:

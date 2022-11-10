@@ -123,7 +123,6 @@ sqlite3 -header run.db < sql.in
 
 echo "" >> $sqlreport
 echo "Report for instance: $instance" >> $sqlreport
-ls -l /p4/$instance/root >> $sqlreport
 echo "$rundir" >> $sqlreport
 echo "" >> $sqlreport
 cat $sqlreport

@@ -27,6 +27,9 @@ echo "Master server now running"
 export P4BENCH_HOME=/p4/benchmark
 cd $P4BENCH_HOME
 
+# Use the default hosts file for docker
+export ANSIBLE_HOSTS=hosts.docker.yaml
+
 # Turn off host checking for ansible
 cat <<"EOF" > ansible.cfg
 [defaults]

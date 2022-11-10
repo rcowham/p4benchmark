@@ -42,7 +42,7 @@ def readConfig(startdir, config_file):
     config = {}
     with open(os.path.join(startdir, config_file), "r") as f:
         config = yaml.load(f, Loader=yaml.Loader)
-    return config
+    return config["all"]["vars"]
 
 def fmtsize(num):
     for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:

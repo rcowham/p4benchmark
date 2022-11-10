@@ -20,6 +20,9 @@ cd $P4BENCH_HOME
 instance=${1:-Unset}
 [[ $instance == "Unset" ]] && bail "Specify instance as parameter"
 
+[[ -z $ANSIBLE_HOSTS ]] && bail "Environment variable ANSIBLE_HOSTS not set"
+[[ -e $ANSIBLE_HOSTS ]] || bail "ANSIBLE_HOSTS file not found: $ANSIBLE_HOSTS"
+
 P4BENCH_SCRIPT=${2:-Unset}
 [[ $P4BENCH_SCRIPT == "Unset" ]] && bail "Specify P4BENCH_SCRIPT as second parameter"
 [[ ! -f locust_files/p4_$P4BENCH_SCRIPT.py ]] && bail "Benchmark script $P4BENCH_SCRIPT not found: locust_files/p4_$P4BENCH_SCRIPT.py"
@@ -27,11 +30,10 @@ P4BENCH_SCRIPT=${2:-Unset}
 export P4BENCH_HOST=`hostname`
 export P4BENCH_SCRIPT
 # Calculate env vars to be picked up by run_master.sh
-export P4BENCH_NUM_WORKERS_PER_HOST=$(grep "num_workers" hosts | awk '{print $2}')
-export P4BENCH_CLIENT_USER=$(grep "p4bench_client_user" hosts | awk '{print $2}')
 
-hosts=$(grep -A 99999 bench_clients: hosts | grep -E "^\s+\S+:$" | wc -l)
-export P4BENCH_NUM_HOSTS=$(($hosts - 2))
+export P4BENCH_NUM_WORKERS_PER_HOST=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.num_workers')
+export P4BENCH_CLIENT_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_client_user')
+export P4BENCH_NUM_HOSTS=$(cat $ANSIBLE_HOSTS | yq '.all.vars.perforce.port' | grep -c :)
 
 echo "Running p4_${P4BENCH_SCRIPT} on instance ${instance}"
 
@@ -49,10 +51,10 @@ sed -e "s/:1666/:${instance}666/" < locust_files/$config_file > $config_file
 
 rm logs/*worker*.out
 echo "Removing remote logs..."
-ansible-playbook -i hosts ansible/rm_client_logs.yml > /dev/null
-ansible-playbook -i hosts ansible/rm_server_logs.yml > /dev/null
-ansible-playbook -i hosts ansible/post_previous_client_bench.yml
-ansible-playbook -i hosts ansible/pre_client_bench.yml
+ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_client_logs.yml > /dev/null
+ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
+ansible-playbook -i $ANSIBLE_HOSTS ansible/post_previous_client_bench.yml
+ansible-playbook -i $ANSIBLE_HOSTS ansible/pre_client_bench.yml
 
 # Flush filesystem caches on server
 sudo sync
@@ -60,7 +62,7 @@ sudo bash -c 'echo 3 > /proc/sys/vm/drop_caches'
 
 # Run the locust master - waiting for clients to connect
 $P4BENCH_UTILS/run_locust_master.sh
-ansible-playbook -i hosts ansible/client_bench.yml
+ansible-playbook -i $ANSIBLE_HOSTS ansible/client_bench.yml
 
 # echo "Running monitor jobs in background"
 # $P4BENCH_UTILS/run_monitor.sh &

@@ -27,7 +27,7 @@ logger = logging.getLogger("p4_basic")
 
 startdir = os.getcwd()
 
-CONFIG_FILE = "config_p4_basic.yml"   # Configuration parameters
+CONFIG_FILE = os.getenv("ANSIBLE_HOSTS")   # Configuration parameters
 
 class P4BasicBenchmark(P4Benchmark):
     """Performs basic benchmark test - Perforce specific subclass"""

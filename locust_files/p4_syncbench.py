@@ -28,7 +28,7 @@ logger = logging.getLogger("p4_syncbench")
 
 startdir = os.getcwd()
 
-CONFIG_FILE = "config_p4_syncbench.yml"   # Configuration parameters
+CONFIG_FILE = os.getenv("ANSIBLE_HOSTS")   # Configuration parameters
 
 class P4BuildFarmBenchmark(P4Benchmark):
     """Performs basic benchmark test - Perforce specific subclass"""

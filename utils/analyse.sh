@@ -13,25 +13,26 @@ last_run=$(ls $P4BENCH_HOME/run/ | sort -n | tail -1)
 runid=$((last_run+1))  
 rundir=$P4BENCH_HOME/run/$runid
 
+[[ -z $ANSIBLE_HOSTS ]] && bail "Environment variable ANSIBLE_HOSTS not set"
+[[ -e $ANSIBLE_HOSTS ]] || bail "ANSIBLE_HOSTS file not found: $ANSIBLE_HOSTS"
+
 echo "Creating $rundir"
 
 # copy logs - server logs for analysis and clients just in case
 echo "Copying logs..."
-ansible-playbook -i hosts ansible/copy_server_logs.yml > /dev/null
-ansible-playbook -i hosts ansible/copy_client_logs.yml > /dev/null
-ansible-playbook -i hosts ansible/rm_server_logs.yml > /dev/null
+ansible-playbook -i $ANSIBLE_HOSTS ansible/copy_server_logs.yml > /dev/null
+ansible-playbook -i $ANSIBLE_HOSTS ansible/copy_client_logs.yml > /dev/null
+ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
 
 mkdir $rundir
-config_file=$(ls -tr $P4BENCH_HOME/config_p4_* | tail -1)
 pushd $rundir
-cp $config_file .
+cp "$P4BENCH_HOME/$ANSIBLE_HOSTS" .
 
-p4port=`grep 666 $config_file | head -1 | sed -e 's/\s*port:\s*//' | sed -e 's/ \- //'`
-p4user=`grep user $config_file | sed -e 's/\s*user:\s*//'`
+p4port=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[0]')
+p4user=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.user')
 p4="p4 -p $p4port -u $p4user "
 
-port=`echo "$p4port" | cut -d: -f2`
-instance=${port:0:1}
+instance=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.sdp_instance')
 
 [[ $instance -gt 0 && $instance -lt 10 ]] || bail "can't find instance"
 
@@ -57,7 +58,6 @@ done
 
 echo $p4 configure show > config.out
 $p4 configure show > config.out
-sudo ls -l /p4/$instance/ >> config.out
 grep numActions $P4BENCH_HOME/locust_files/p4benchutils.py >> config.out
 
 # record number of submitted changes

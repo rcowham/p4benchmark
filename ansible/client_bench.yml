@@ -12,4 +12,5 @@
       P4BENCH_NUM_WORKERS: "{{ num_workers }}"
       P4BENCH_SCRIPT: "{{ p4bench_script }}"
       P4BENCH_HOST: "{{ p4bench_host }}"
+      ANSIBLE_HOSTS: "{{ lookup('env', 'ANSIBLE_HOSTS') }}"
 

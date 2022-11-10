@@ -1,0 +1,63 @@
+# Ansible hosts file in YAML format
+# hosts.docker - the version used for docker-compose example
+
+# localhost ansible_connection=local
+#
+all:
+  vars:
+    # OS User account to execute commands
+    remote_user: perforce
+    # The directory to which benchmark scripts are copied on client machines, and where run from
+    bench_dir: /p4/benchmark
+    # The common directory on client machines in which workspaces are run
+    workspace_common_dir: /p4/work
+    # The p4user account used for running client programs (and which owns client workspaces/changelists etc)
+    p4bench_client_user: bruno
+    # The p4user account used for setting up repository - must be different to the _client_user
+    p4bench_setup_user: perforce
+    # The perforce SDP instance
+    sdp_instance: 1
+    # The port to use
+    p4port: 1666
+    # Number of workers per bench_client
+    num_workers: 12
+
+    # This section is mainly for the locust scripts more than the yaml files
+    general:
+        min_wait: 100
+        max_wait: 100
+        workspace_root:  /p4/work
+
+    # Perforce benchmark testing parameters
+    # Specify password if required
+    perforce:
+        # Array of ports - can include ssl prefix. Allows for random selection of commit/edge servers
+        port:
+        - master:1666
+        user:       bruno
+        charset:
+        # password:   "my!Password"
+        password:   
+        options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
+        sync_progress_size_interval: 100 * 1000 * 1000
+        # repoPath: should not include trailing /...
+        #   If it includes "*" will be used as base for selection after running "p4 dirs" on it
+        repoPath:   //depot/*
+        # repoDirNum: (numeric) Number of entries to randomly select from the above "p4 dirs" output if relevant
+        repoDirNum: 2
+        # How many times to repeat the loop
+        repeat: 5
+        # sync_args: any extra sync arguments. This will result in the spawning of a "p4" command
+        # Example to avoid actually writing files to filesystem on client side:
+        #sync_args: -vfilesys.client.nullsync=1
+        # Any other -v or similar options possible.
+        # Note that the following commands will be passed automatically: -p/-u/-c
+
+  children:
+    bench_servers:
+      hosts:
+        master:
+    bench_clients:
+      hosts:
+        client1:
+        client2:
