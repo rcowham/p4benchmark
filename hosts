@@ -24,7 +24,7 @@ all:
   children:
     bench_servers:
       hosts:
-        master
+        master:
     bench_clients:
       hosts:
         client1:
