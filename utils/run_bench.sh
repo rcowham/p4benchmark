@@ -33,23 +33,14 @@ export P4BENCH_SCRIPT
 
 export P4BENCH_NUM_WORKERS_PER_HOST=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.num_workers')
 export P4BENCH_CLIENT_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_client_user')
-export P4BENCH_NUM_HOSTS=$(cat $ANSIBLE_HOSTS | yq '.all.vars.perforce.port' | grep -c :)
+export P4BENCH_NUM_HOSTS=$(cat $ANSIBLE_HOSTS | yq '.all.children.bench_clients.hosts | length')
 
 echo "Running p4_${P4BENCH_SCRIPT} on instance ${instance}"
 
 echo "Removing $P4BENCH_CLIENT_USER clients"
 $P4BENCH_UTILS/del_clients.sh $instance
 
-# Remove existing logs to make sure they don't clutter up the measurements
-[[ -f /p4/$instance/logs/log ]] && sudo rm /p4/$instance/logs/log
-# Remove shared logs on other (replica) servers if appropriate
-# E.g. via ssh or directly from shared storage
-#sudo rm /remote/p4/rep/h02_$instance/logs/log
-
-config_file="config_p4_${P4BENCH_SCRIPT}.yml"
-sed -e "s/:1666/:${instance}666/" < locust_files/$config_file > $config_file
-
-rm logs/*worker*.out
+rm -f logs/*worker*.out logs/*log
 echo "Removing remote logs..."
 ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_client_logs.yml > /dev/null
 ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
@@ -57,10 +48,9 @@ ansible-playbook -i $ANSIBLE_HOSTS ansible/post_previous_client_bench.yml
 ansible-playbook -i $ANSIBLE_HOSTS ansible/pre_client_bench.yml
 
 # Flush filesystem caches on server
-sudo sync
-sudo bash -c 'echo 3 > /proc/sys/vm/drop_caches'
+ansible-playbook -i $ANSIBLE_HOSTS ansible/flush_server_cache.yml
 
-# Run the locust master - waiting for clients to connect
+# Run the locust master - waiting for clients to connect and then spawn client worker jobs
 $P4BENCH_UTILS/run_locust_master.sh
 ansible-playbook -i $ANSIBLE_HOSTS ansible/client_bench.yml
 

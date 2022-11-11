@@ -15,7 +15,10 @@ elif [[ $(id -u -n) != $OSUSER ]]; then
    exit 1
 fi
 
-echo "Starting up master server"
+echo "Waiting for master server ssh"
+until nc -zw 1 master 22; do sleep 1; done && sleep 1
+
+echo "Starting up master server p4d"
 ssh master /p4/benchmark/docker_entry_master.sh
 
 # Wait for p4d to be running

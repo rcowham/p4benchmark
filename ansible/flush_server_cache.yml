@@ -1,0 +1,13 @@
+- name: Flush server filesystem caches
+  hosts: bench_servers
+  tasks:
+
+  - name: Sync filesystem
+    shell: sudo sync
+    ignore_errors: yes
+
+  - name: Drop caches
+    shell: sudo bash -c 'echo 3 > /proc/sys/vm/drop_caches'
+    ignore_errors: yes
+
+
