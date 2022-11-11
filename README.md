@@ -40,12 +40,14 @@ and instance 2 with the other configuration you want to test.
 
 See the Docker Compose and Dockerfiles for an example of how the SDP is setup.
 
+There is also a set of Terraform files which can be used to automate the whole process in AWS (Azure to come!)
+
 # Simple Setup - Docker Compose
 
 There is a Dockerfile and related docker-compose.yml which show how to
-install a single (commit) server, and run the benchmark with 2 client machines.
+install a benchmark driver server, a single (commit) server, and run the benchmark with 2 client machines.
 
-It is based on CentOS 7 container and does full installation and runs the tests.
+It is based onRocky Linux 8 container and does full installation and runs the tests.
 
     docker-compose build
 
@@ -70,9 +72,9 @@ master_1   | Submitted change start 40 end 186
 master_1   | Count: 97
 master_1   | 
 master_1   | 
-master_1   | Waiting for 60 seconds (in case you want to have a look at the machine)
-master_1   | If so, run:
-master_1   |     docker exec -ti pure_benchmark_master_1 /bin/bash
+master_1   | Waiting for 600 seconds (in case you want to have a look at the machine)
+master_1   | If so, run this from another terminal session:
+master_1   |     docker exec -ti p4benchmark_master_1 /bin/bash
 ```
 
 When done, just Ctrl+C to stop the containers. (Or use `docker ps` and `docker kill`).
@@ -87,33 +89,19 @@ You need to ensure that all client machines have the basic software installed:
 
 - a suitable test account, e.g. perforce, with sudo access on the boxes (may require known_hosts to be setup)
 - ssh access without passwords (also required for Ansible)
-- suitable Python installation (e.g. Python 3.6+) and other dependencies of Locust
+- suitable Python installation (e.g. Python 3.8) and other dependencies of Locust (see docker/Dockerfile)
 
 ## Configuration of server and client machines
 
 The Ansible scripts are primarily in the `./ansible` directory. They can be run manually but are typically
 run by the top level bash scripts.
 
-Edit the Ansible hosts file to reflect the names of your actual machines. "replicas" are the commit/edge servers. "bench_clients" the client machines:
+Edit the Ansible hosts file to reflect the names of your actual machines. 
 
-    # Ansible hosts file in YAML format
-    all:
-      vars:
-        remote_user: perforce
-        bench_dir: /p4/benchmark
-        # Number of workers per bench_client
-        num_workers: 8
+See the example `hosts.docker.yaml`. It is a YAML format for Ansible, and includes various configuration values
+for the actual locust scripts.
 
-      children:
-        replicas:
-          hosts:
-            edge1:
-            edge2:
-        bench_clients:
-          hosts:
-            client1:
-            client2:
-            client3:
+You may have several versions of this file, and set an environment variable `ANSIBLE_HOSTS` to point to the desired one.
 
 ## Bootstrapping machines
 
@@ -131,6 +119,8 @@ This will prompt for password and then do the actions in the script.
 # Setting up your Perforce commit instance(s)
 
 It is recommended to use the SDP to configure and start your instance, assigning appropriate storage etc.
+
+The benchmark scripts rely on an SDP structure being in place.
 
 ## Creating repository files
 
@@ -206,7 +196,7 @@ cd $ws_root
 p4 --field "View=//depot/... //test_ws/..." client -o | p4 client -i
 
 # Create the random test files.
-python3.6 /p4/benchmark/locust_files/createfiles.py -d $ws_root -l 5 5 -c
+python3 /p4/benchmark/locust_files/createfiles.py -d $ws_root -l 5 5 -c
 
 # Reconcile (to add) and submit them
 p4 rec 
@@ -235,7 +225,7 @@ Where `do_rec.sh` is:
 # Parameter: <2 digit directory>
 root=`pwd`
 dir="$root/$1"
-p4 rec $dir/...
+p4 rec -a $dir/...
 p4 submit -d "Initial import" "$dir/..."
 ```
 
@@ -248,73 +238,79 @@ There are currently 2 benchmarks:
 
 ## Configuration
 
-Edit the file locust_files/config_p4_[syncbench,basic].yaml according the comments in it to specify your local P4D and
+Edit the file `hosts.yaml` and according the comments in it to specify your local P4D and
 repository paths to use.
 
 ``` yaml
+all:
+  vars:
+    # Other vars
+    # :
+
+    # Script vars:
     general:
         min_wait: 1000
         max_wait: 10000
         workspace_root: /tmp/bench_tests
     
-# Perforce benchmark testing parameters
-# Specify password if required
-# port is an array to allow for multiple possible servers to be specified if required
-perforce:
-    port:       
-    - 10.21.152.35:1666
-    - 10.21.152.36:1666
-    user:       bruno
-    charset:
-    password:
-    options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
-    # The following only takes effect if sync_args not used.
-    sync_progress_size_interval: 100 * 1000 * 1000
-    # The following should not include trailing /...
-    # Will be used as base for selection after running "p4 dirs %s/*"
-    repoPath:   //depot
-    repoSubDir: "*"
-    # Following selects a number of sub directories - so you can set to say 50% of the directories at the next level
-    repoSubDirNum: 80
-    # How many times to repeat the task before exiting
-    repeat: 50
-    # sync_args: any extra sync arguments. This will result in the spawning of a "p4" command
-    # Example to avoid actually writing files to filesystem on client side:
-    #sync_args: -vfilesys.client.nullsync=1
-    sync_args: -vtrack=1
-    # Any other -v or similar options possible.
-    # Note that the following commands will be passed automatically: -p/-u/-c
+    # Perforce benchmark testing parameters
+    # Specify password if required
+    # port is an array to allow for multiple possible servers to be specified if required
+    perforce:
+        port:       
+        - 10.21.152.35:1666
+        - 10.21.152.36:1666
+        user:       bruno
+        charset:
+        password:
+        options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
+        # The following only takes effect if sync_args not used.
+        sync_progress_size_interval: 100 * 1000 * 1000
+        # The following should not include trailing /...
+        # Will be used as base for selection after running "p4 dirs %s/*"
+        repoPath:   //depot
+        repoSubDir: "*"
+        # Following selects a number of sub directories - so you can set to say 50% of the directories at the next level
+        repoSubDirNum: 80
+        # How many times to repeat the task before exiting
+        repeat: 50
+        # sync_args: any extra sync arguments. This will result in the spawning of a "p4" command
+        # Example to avoid actually writing files to filesystem on client side:
+        #sync_args: -vfilesys.client.nullsync=1
+        #sync_args: -vtrack=1
+        # Any other -v or similar options possible.
+        # Note that the following commands will be passed automatically: -p/-u/-c
 ```
 
 ## Running the tool
 
 Ensure Perforce server running:
 
-    ./run_bench.sh 1 basic
+    utils/run_bench.sh 1 basic
 
 This will typically take a minute or two to launch the benchmark.
 
-You can observe via `./do_monitor.sh` how many concurrent processes are running. Or use the `top` command.
+You can observe via `utils/do_monitor.sh` how many concurrent processes are running against the server(s).
 
 When the benchmark has finished:
 
-    ./analyse.sh
+    utils/analyse.sh
 
 This creates a new directory under `./run/` and copies relevant log files from the worker (client) machines, as well as the replicas (if used). 
-At the end it will run the log2sql.py log analysis script to create a Sqlite database, and then run some queries on that database.
+At the end it will run the `log2sql` log analysis script to create a Sqlite database, and then run some queries on that database.
 
-It uses `log2sql` from https://github.com/rcowham/go-libp4dlog/releases
+It uses `log2sql` from https://github.com/rcowham/go-libp4dlog/releases (see Dockerfile for example of installation)
 
 It also saves various configuration values, so that you can compare
 and contrast the results of different configurations with
 each other.
 
-There is a convenience script: `wait_end_bench.sh` - you can edit this script and check to make sure it is configured with any replicas used.
+There is a convenience script: `utils/wait_end_bench.sh` - you can edit this script and check to make sure it is configured with any replicas used.
 
 Then the following command will run everything:
 
 ``` bash
-nohup .\run_bench.sh 1 basic && sleep 30 && ./wait_end_bench.sh && sleep 30 && ./analyse.sh &
+nohup utils\run_bench.sh 1 basic && sleep 30 && utils/wait_end_bench.sh && sleep 30 && utils/analyse.sh &
 ```
 
 ## Examples of running the tool
@@ -350,7 +346,7 @@ on different machines, each communicating results to the master for reporting.
 
 Tested on Windows (with 32 bit python) and Linux/Mac.
 
-* Python 3.6+
+* Python 3.8+
 
 The following packages should be installed via pip:
 
