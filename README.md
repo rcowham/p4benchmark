@@ -214,8 +214,11 @@ Typically we would submit the files as user "perforce" so that when benchmark ma
 
 Setup your P4PORT/P4CLIENT/P4USER environment variables, and install [Gnu Parallel]()
 
-  for i in {00..39}; do echo $i >> list.txt ; done
-  nohup cat list.txt | parallel 'echo -n {}" "; ./do_rec.sh {} >> {}.out 2>&1 ' &
+```
+for i in {00..39}; do echo $i >> list.txt ; done
+
+nohup cat list.txt | parallel 'echo -n {}" "; ./do_rec.sh {} >> {}.out 2>&1 ' &
+```
 
 Where `do_rec.sh` is:
 
