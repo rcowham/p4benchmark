@@ -27,7 +27,8 @@ P4BENCH_SCRIPT=${2:-Unset}
 [[ $P4BENCH_SCRIPT == "Unset" ]] && bail "Specify P4BENCH_SCRIPT as second parameter"
 [[ ! -f locust_files/p4_$P4BENCH_SCRIPT.py ]] && bail "Benchmark script $P4BENCH_SCRIPT not found: locust_files/p4_$P4BENCH_SCRIPT.py"
 
-export P4BENCH_HOST=`hostname`
+export DEFAULT_ROUTE_INTERFACE=$(ip route  | grep default | awk '{print $5}')
+export P4BENCH_HOST=$(ifconfig $DEFAULT_ROUTE_INTERFACE | grep "inet " | awk '{print $2}')
 export P4BENCH_SCRIPT
 # Calculate env vars to be picked up by run_master.sh
 

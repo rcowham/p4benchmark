@@ -12,15 +12,8 @@ variable "vpc_cidr" {
 }
 
 
-
-variable "name" {
-  description = "Name to be used on EC2 instance"
-  type        = string
-  default     = ""
-}
-
 variable "ami" {
-  description = "ID of AMI to use for the instance"
+  description = "AMI ID to use for Helix Core commit server"
   type        = map(string)
   default = {
     "ap-northeast-1" = "ami-01e2129786264c400"
@@ -43,18 +36,21 @@ variable "ami" {
   }
 }
 
+# not implemented yet
+# variable "helix_core_p4d_configurables" {
+#   description = "Array of p4d configurables to apply at deploy time"
+#   type        = list(string)
+#   default = [
+#     "p4 configure set net.parallel.max=100",
+#     "p4 configure set net.parallel.threads=10"
+#   ]
+# }
 
 variable "associate_public_ip_address" {
   description = "Whether to associate a public IP address with an instance in a VPC"
   type        = bool
   default     = null
 }
-
-# variable "iam_instance_profile" {
-#   description = "IAM Instance Profile to launch the instance with. Specified as the name of the Instance Profile"
-#   type        = string
-#   default     = null
-# }
 
 variable "owner" {
   description = "Who is the owner of this infrastructure?  This value will be applied as a tag to all resources."
@@ -148,15 +144,15 @@ variable "metadata_volume_iops" {
 }
 
 variable "environment" {
-  description = "Availability Zone EBS volumes we be created in."
+  description = "What environment is this for?  This value will be applied to all resources as a tag"
   type        = string
-  default     = "dev"
+  default     = "test"
 }
 
 
 
 variable "key_name" {
-  description = "Key name of the Key Pair to use for the instance."
+  description = "Key name of the Key Pair to use for all instances."
   type        = string
 }
 
@@ -166,8 +162,8 @@ variable "monitoring" {
   default     = true
 }
 
-variable "private_ip" {
-  description = "Private IP address to associate with the instance in a VPC.  Leave null to allow DHCP to assign IP address."
+variable "helix_coreprivate_ip" {
+  description = "Private IP address to associate with the Helix Core instance in a VPC.  Leave null to allow DHCP to assign IP address."
   type        = string
   default     = null
 }
@@ -187,15 +183,21 @@ variable "ingress_cidrs_1666" {
 }
 
 variable "ingress_cidrs_22" {
-  description = "CIDR blocks to whitelist for SSH access"
+  description = "CIDR blocks to whitelist for Helix Core SSH access"
   type        = string
   default     = ""
 }
 
 variable "ingress_cidrs_locust" {
-  description = "CIDR blocks to whitelist for SSH access"
+  description = "CIDR blocks to whitelist for Locust SSH access"
   type        = string
   default     = ""
+}
+
+variable "ingress_cidrs_3000" {
+  description = "CIDR blocks to whitelist for Grafana access"
+  type        = list(string)
+  default     = [""]
 }
 
 
@@ -213,6 +215,24 @@ variable "client_instance_type" {
   description = "The type of instance to for Locust clients"
   type        = string
   default     = "t3.small"
+}
+
+variable "locust_repo_path" {
+  description = "The depot path locust clients will create their workspaces from"
+  type        = string
+  default     = "//depot/*"
+}
+
+variable "locust_repo_dir_num" {
+  description = "Number of entires to select from p4 dirs output.  p4 dirs output will be limited by value of locust_repo_path"
+  type        = string
+  default     = "5"
+}
+
+variable "locust_repeat" {
+  description = "How many times the locust client will repeat the loop"
+  type        = string
+  default     = "5"
 }
 
 
@@ -269,31 +289,22 @@ variable "p4benchmark_github_branch" {
 }
 
 
+variable "createfile_configs" {
+  description = "createfile_configs is an array of maps.  Each object will be passed to createfiles.py.  Use an empty array if you want to skip running createfiles.py from terraform"
+  type        = list(map(string))
 
-variable "createfile_levels" {
-  description = "Create Files - Directories to create at each level, e.g. -l 5 10"
-  type        = string
-  default     = "10 10"
-}
-
-variable "createfile_size" {
-  description = "Create Files - Average size of files"
-  type        = string
-  default     = "20000"
-}
-
-variable "createfile_number" {
-  description = "Create Files - Number of files to create"
-  type        = string
-  default     = "100"
+  # https://github.com/rcowham/p4benchmark#creating-repository-files
+  default = [
+    {
+      createfile_levels    = "25 25" # Directories to create at each level, e.g. -l 5 10
+      createfile_size      = "10000" # Average size of files
+      createfile_number    = "10000" # Number of files to create
+      createfile_directory = "ws1"   # Directory under /tmp/ to create and use for the p4 workspace
+    }
+  ]
 }
 
 
-variable "createfile_directory" {
-  description = "Create Files - Directory where to start"
-  type        = string
-  default     = "/tmp/ws"
-}
 
 variable "helix_core_commit_username" {
   description = "Username to use for administoring Helix Core"
@@ -313,10 +324,22 @@ variable "p4benchmark_os_user" {
   default     = "perforce"
 }
 
+variable "p4benchmark_dir" {
+  description = "The directory where p4benchmark code will be checked out to"
+  type        = string
+  default     = "/p4benchmark"
+}
+
+variable "locust_workspace_dir" {
+  description = "The directory the p4 locust clients will use"
+  type        = string
+  default     = "/p4/work"
+}
+
 variable "number_locust_workers" {
   description = "Number of Locust worker threads"
   type        = number
-  default     = 12
+  default     = 2
 }
 
 variable "s3_checkpoint_bucket" {
@@ -331,9 +354,86 @@ variable "checkpoint_filename" {
   default     = ""
 }
 
+variable "license_filename" {
+  description = "Name of the license file in S3"
+  type        = string
+  default     = "license"
+}
+
 variable "archive_filename" {
   description = "Name of the archive file in S3 (must be .tgz file)"
   type        = string
   default     = ""
 }
 
+variable "existing_vpc" {
+  description = "Whether or not to use an existing VPC or create one"
+  type        = bool
+  default     = false
+}
+
+variable "existing_helix_core" {
+  description = "Whether or not to use an existing Helix Core or create one"
+  type        = bool
+  default     = false
+}
+
+variable "existing_vpc_id" {
+  description = "Existing VPC ID to use for EC2 deployments"
+  type        = string
+  default     = ""
+}
+
+variable "existing_public_subnet" {
+  description = "Existing public subnet ID to use for EC2 deployments"
+  type        = string
+  default     = ""
+}
+
+variable "existing_az" {
+  description = "Existing Availability Zone to create Helix Core volumes in"
+  type        = string
+  default     = ""
+}
+
+variable "existing_sg_ids" {
+  description = "Existing security group ID to use for network connectivity between locust client machines and Helix Core"
+  type        = list(string)
+  default     = []
+}
+
+variable "existing_helix_core_ip" {
+  description = "Existing helix core IP for locust clients to use for P4PORT"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_public_ip" {
+  description = "Existing helix core public IP for terraform to connect via remote-exec for configuration"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_port" {
+  description = "Existing helix core port for locust clients to use for P4PORT"
+  type        = string
+  default     = "1666"
+}
+
+variable "existing_helix_core_username" {
+  description = "Existing helix core username for locust clients to use for P4USER"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_password" {
+  description = "Existing helix core password for locust clients to use for p4 login"
+  type        = string
+  default     = ""
+}
+
+variable "install_p4prometheus" {
+  description = "Wether or not to install p4prometheus on the driver EC2 instance"
+  type        = bool
+  default     = true
+}

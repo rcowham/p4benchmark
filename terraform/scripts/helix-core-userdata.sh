@@ -26,6 +26,7 @@ export HOSTNAME="commit"
 export RESTORED_FROM_SNAPSHOT=false
 export SWARM_IP=""
 export DEPOT_CONTENT_SNAPSHOT=""
+# TODO: make this work for both AWS and Azure.  need to test if cloud-init query cloud_name works across all our clouds
 export AWS_REGION=$(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
 
 export P4D_AUTH_ID="commit"
@@ -35,24 +36,18 @@ export LOG_DEVICE="/dev/sdg"
 export METADATA_DEVICE="/dev/sdh"
 
 
-# if [[ "${s3_checkpoint_bucket}" != '' ]] ;
-# then
-#     echo "Extracting depot data archive and restoring from checkpoint"
-
-#     export RESTORED_FROM_SNAPSHOT=true
-#     aws s3 cp s3://${s3_checkpoint_bucket}/${checkpoint_filename} /p4/1/checkpoints/
-
-#     aws s3 cp s3://${s3_checkpoint_bucket}/${archive_filename} /hxdepots/
-
-#     # tar zxvf -C /p4/1/depots/ fileNameHere.tgz
-
-# fi
-
-
-
-
 run-parts /home/perforce/.userdata/custom-pre/
 
 run-parts /home/perforce/.userdata/default/
 
 run-parts /home/perforce/.userdata/custom-post/
+
+if [[ "${license_filename}" != '' ]] ;
+then
+    echo "Pulling down license file from S3..."
+
+    aws s3 cp s3://${s3_checkpoint_bucket}/${license_filename} /p4/1/root/license
+    service p4d_1 restart
+    sleep 10  
+    echo "Finished applying the license"
+fi

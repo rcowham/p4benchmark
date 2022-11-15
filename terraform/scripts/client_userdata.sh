@@ -36,15 +36,43 @@ EOF
 
 rpm --import https://package.perforce.com/perforce.pubkey
 
-yum install -y helix-p4d perforce-p4python3
+yum group install -y "Development Tools"  --nogpgcheck
+yum install -y helix-p4d epel-release sqlite wget jq vim net-tools perl nmap-ncat python38 python38-devel python3-pip perforce-p4python3-python3.8
+yum remove -y python36 python39
 
-yum group install -y "Development Tools"
-yum install -y nmap-ncat python3 python3-devel python3-numpy python3-pip python3-setuptools python3-wheel openssl-devel
+echo /usr/local/lib>> /etc/ld.so.conf
+echo /usr/lib64>> /etc/ld.so.conf
 
-cd /
+# copy down the project from github just so we can get the requirments.txt file
+# laster the driver VM will use ansible to copy over the required files
+cd /tmp
 git clone https://github.com/${git_owner}/${git_project}.git
 cd ${git_project}/
 git checkout ${git_branch}
 
 cd locust_files
 pip3 install -r requirements.txt
+
+rm -rf /tmp/${git_project}
+
+mkdir -p /${p4benchmark_dir}
+chown -R ${p4benchmark_os_user}:${p4benchmark_os_user} ${p4benchmark_dir}
+
+mkdir -p /${locust_workspace_dir}
+chown -R ${p4benchmark_os_user}:${p4benchmark_os_user} ${locust_workspace_dir}
+
+
+cat << EOF >> /etc/security/limits.conf
+
+perforce        hard nofile 10000
+perforce        soft nofile 10000
+EOF
+
+
+# the python code does a login but not a trust
+# the user data cant do a login at this point because the p4benchmark_os_user is created by the driver
+# vm which is created after the client VMs
+export P4TRUST="/home/${p4benchmark_os_user}/.p4trust"
+export P4PORT="ssl:${helix_core_private_ip}:1666"
+p4 trust -y
+chown ${p4benchmark_os_user}:${p4benchmark_os_user} /home/${p4benchmark_os_user}/.p4*

@@ -1,5 +1,6 @@
 - name: Install p4benchmark scripts prior to running benchmark
   hosts: bench_clients
+  remote_user: '{{ remote_user }}'
   tasks:
 
     - name: Ensures directory exists
