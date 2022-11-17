@@ -58,8 +58,9 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
-
 .terraform.lock.hcl
+variables.tf.local
+terraform.tfvars
 
 # Ignore private keys
 *.pem

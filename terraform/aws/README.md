@@ -20,7 +20,7 @@
 | <a name="input_depot_volume_size"></a> [depot\_volume\_size](#input\_depot\_volume\_size) | Volume size for Depot volume | `number` | `500` | no |
 | <a name="input_depot_volume_throughput"></a> [depot\_volume\_throughput](#input\_depot\_volume\_throughput) | Volume throughput for Depot volume (only valid for volume type GP3) | `number` | `null` | no |
 | <a name="input_depot_volume_type"></a> [depot\_volume\_type](#input\_depot\_volume\_type) | Volume type for Depot volume | `string` | `"gp3"` | no |
-| <a name="input_driver_instance_type"></a> [driver\_instance\_type](#input\_driver\_instance\_type) | The type of instance to for driver | `string` | `"t3.small"` | no |
+| <a name="input_driver_instance_type"></a> [driver\_instance\_type](#input\_driver\_instance\_type) | The type of instance to for driver.  Typically the driver VM can be very small because it is just an orchestrator.  The one exception is if you want terraform to run createfiles.py.  If you load up createfile\_configs with multiple itterations these will all be run from the driver VM in parallel | `string` | `"t3.small"` | no |
 | <a name="input_driver_root_volume_size"></a> [driver\_root\_volume\_size](#input\_driver\_root\_volume\_size) | The size of the root volume for the driver | `number` | `100` | no |
 | <a name="input_driver_root_volume_type"></a> [driver\_root\_volume\_type](#input\_driver\_root\_volume\_type) | The root volume type for driver | `string` | `"gp2"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | What environment is this for?  This value will be applied to all resources as a tag | `string` | `"test"` | no |

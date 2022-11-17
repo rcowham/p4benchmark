@@ -41,7 +41,10 @@ locals {
 }
 
 resource "aws_instance" "driver" {
-  depends_on = [null_resource.helix_core_cloud_init_status, null_resource.client_cloud_init_status]
+  # we must wait for cloud-init on helix core to complete so that we know helix core is up, passwords are set, etc
+  # the driver VM has a dependnecy on the client machines but not on cloud-init finishing on the client machines
+  # the driver VM just needs the IPs of the client VMS
+  depends_on = [null_resource.helix_core_cloud_init_status, aws_instance.locust_clients]
 
   ami                         = data.aws_ami.rocky.image_id
   instance_type               = var.driver_instance_type
