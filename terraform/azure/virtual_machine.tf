@@ -22,9 +22,9 @@ resource "azurerm_linux_virtual_machine" "p4_virtual_machine" {
     version = "1.9.5"
   }
   plan {
-    name = "perforce-helix-core-offer"
+    name = "p4d_2020_1_2107780_v2"
     publisher = "perforce"
-    product = "p4d_2020_1_2107780_v2"
+    product = "perforce-helix-core-offer"
   }
   tags = {
     Environment = var.environment
