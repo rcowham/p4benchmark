@@ -10,7 +10,6 @@ locals {
   }))
 }
 
-
 resource "azurerm_linux_virtual_machine" "helix_core" {
   name                = "p4Benchmark"
   resource_group_name = azurerm_resource_group.p4benchmark.name
@@ -114,4 +113,33 @@ resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_metadata_dis
   virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
   lun                = "2"
   caching            = "ReadWrite"
+}
+
+resource "azurerm_public_ip" "p4Benchmark_public_ip" {
+  name                = "p4Benchmark_public_ip"
+  resource_group_name = azurerm_resource_group.p4benchmark.name
+  location            = azurerm_resource_group.p4benchmark.location
+  allocation_method   = "Static"
+
+  tags = {
+    environment = "Production"
+  }
+}
+
+resource "azurerm_network_interface" "vm_p4_network" {
+  name                = "vm_p4_network"
+  location            = azurerm_resource_group.p4benchmark.location
+  resource_group_name = azurerm_resource_group.p4benchmark.name
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.vm_p4_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.p4Benchmark_public_ip.id
+  }
+  tags = {
+    Environment = var.environment
+    Owner       = var.owner
+    Product     = "Perforce P4 Benchmark"
+    Terraform   = "true"
+  }
 }

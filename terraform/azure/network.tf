@@ -1,14 +1,3 @@
-resource "azurerm_public_ip" "p4Benchmark_public_ip" {
-  name                = "p4Benchmark_public_ip"
-  resource_group_name = azurerm_resource_group.p4benchmark.name
-  location            = azurerm_resource_group.p4benchmark.location
-  allocation_method   = "Static"
-
-  tags = {
-    environment = "Production"
-  }
-}
-
 resource "azurerm_virtual_network" "vm_p4_virtual_network" {
   name                = "vm_p4_virtual_network"
   address_space       = ["10.0.0.0/16"]
@@ -123,24 +112,6 @@ resource "azurerm_network_security_rule" "helix_core_swarm_rule" {
   destination_address_prefix = "*"
   resource_group_name         = azurerm_resource_group.p4benchmark.name
   network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
-}
-
-resource "azurerm_network_interface" "vm_p4_network" {
-  name                = "vm_p4_network"
-  location            = azurerm_resource_group.p4benchmark.location
-  resource_group_name = azurerm_resource_group.p4benchmark.name
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.vm_p4_subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.p4Benchmark_public_ip.id
-  }
-  tags = {
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
 }
 
 resource "azurerm_network_interface_security_group_association" "example" {
