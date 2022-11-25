@@ -6,13 +6,13 @@ locals {
 
   helix_core_commit_username = var.helix_core_commit_username
   # TODO: support exsiting Helix deployments and connection to commit server
-  helix_core_commit_password = azurerm_linux_virtual_machine.helix_core.id
+  helix_core_commit_password = azurerm_linux_virtual_machine.helix_core.virtual_machine_id
   helix_core_private_ip      = azurerm_linux_virtual_machine.helix_core.private_ip_address
   helix_core_public_ip       = azurerm_linux_virtual_machine.helix_core.public_ip_address
 
   driver_user_data = base64encode(templatefile("${path.module}/../scripts/driver_userdata.sh", {
     environment                          = var.environment
-    locust_client_ips                    = [] # TODO: support azurerm_linux_virtual_machine.locust_clients.*.private_ip_address
+    locust_client_ips                    = azurerm_linux_virtual_machine.locustclients.*.private_ip_address
     ssh_public_key                       = tls_private_key.ssh-key.public_key_openssh
     ssh_private_key                      = tls_private_key.ssh-key.private_key_openssh
     git_project                          = var.p4benchmark_github_project
@@ -42,11 +42,8 @@ locals {
 }
 
 resource "azurerm_linux_virtual_machine" "driver" {
-  name = "p4-benchmark-driver"
-  # TODO: use cloud init status
-  # depends_on = [null_resource.helix_core_cloud_init_status, null_resource.client_cloud_init_status]
-  depends_on = [null_resource.helix_core_cloud_init_status]
-  # depends_on                 = [azurerm_linux_virtual_machine.helix_core] < just testing
+  name                       = "p4-benchmark-driver"
+  depends_on                 = [null_resource.helix_core_cloud_init_status, null_resource.client_cloud_init_status]
   resource_group_name        = azurerm_resource_group.p4benchmark.name
   location                   = azurerm_resource_group.p4benchmark.location
   size                       = var.driver_instance_type
@@ -173,7 +170,6 @@ resource "null_resource" "run_create_files" {
 resource "null_resource" "apply_p4d_configurables" {
   # TODO:
   depends_on = [null_resource.helix_core_cloud_init_status]
-  # depends_on = [null_resource.driver_cloud_init_status] < just testing
 
   connection {
     type        = "ssh"
@@ -195,9 +191,10 @@ resource "null_resource" "remove_p4d_configurables" {
   depends_on = [null_resource.run_create_files, null_resource.apply_p4d_configurables]
 
   connection {
-    type = "ssh"
-    user = "rocky"
-    host = local.helix_core_public_ip
+    type        = "ssh"
+    user        = "rocky"
+    host        = local.helix_core_public_ip
+    private_key = file("~/.ssh/id_rsa")
   }
 
   provisioner "remote-exec" {

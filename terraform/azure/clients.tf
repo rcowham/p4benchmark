@@ -11,8 +11,8 @@ locals {
     p4benchmark_os_user = var.p4benchmark_os_user
 
     helix_core_commit_benchmark_username = var.helix_core_commit_benchmark_username
-    helix_core_password                  = "perforce"  # TODO: local.helix_core_commit_password
-    helix_core_private_ip                = "127.0.0.1" # TODO: local.helix_core_private_ip
+    helix_core_password                  = local.helix_core_commit_password
+    helix_core_private_ip                = local.helix_core_private_ip
 
     git_project = var.p4benchmark_github_project
     git_branch  = var.p4benchmark_github_branch
@@ -26,8 +26,7 @@ locals {
 
 resource "azurerm_linux_virtual_machine" "locustclients" {
   count      = var.client_vm_count
-  # TODO: enable the following to wait for Helix Core deployment
-  # depends_on = [null_resource.helix_core_cloud_init_status]
+  depends_on = [null_resource.helix_core_cloud_init_status]
 
   name                = format("p4-benchmark-locust-client-%03d", count.index + 1)
   resource_group_name = azurerm_resource_group.p4benchmark.name
@@ -73,7 +72,7 @@ resource "azurerm_public_ip" "clients_public_ip" {
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
   allocation_method   = "Dynamic"
-  tags = local.tags
+  tags                = local.tags
 }
 
 resource "azurerm_network_interface" "clients_network_interface" {
@@ -94,18 +93,17 @@ resource "azurerm_network_interface" "clients_network_interface" {
 # Wait for client cloud-init status to complete.  
 # This will cause terraform to not create the driver instance until client is finished
 resource "null_resource" "client_cloud_init_status" {
-  # TODO: enable the following lines to test whether Client 0 deployment is complete
-  # Will be used by driver.tf
+  connection {
+    type        = "ssh"
+    user        = "rocky"
+    host        = azurerm_linux_virtual_machine.locustclients.0.public_ip_address
+    private_key = file("~/.ssh/id_rsa")
 
-  # connection {
-  #   type = "ssh"
-  #   user = "rocky"
-  #   host = azurerm_linux_virtual_machine.locustclients.0.public_ip_address
-  # }
+  }
 
-  # provisioner "remote-exec" {
-  #   scripts = [
-  #     "${path.module}/../scripts/cloud_init_status.sh"
-  #   ]
-  # }
+  provisioner "remote-exec" {
+    scripts = [
+      "${path.module}/../scripts/cloud_init_status.sh"
+    ]
+  }
 }
