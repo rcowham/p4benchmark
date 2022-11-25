@@ -64,13 +64,7 @@ resource "azurerm_linux_virtual_machine" "locustclients" {
     publisher = "perforce"
     product   = "rockylinux8"
   }
-
-  tags = { # TODO: simplify all resources with single tags map object
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 
 resource "azurerm_public_ip" "clients_public_ip" {
@@ -79,13 +73,7 @@ resource "azurerm_public_ip" "clients_public_ip" {
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
   allocation_method   = "Dynamic"
-
-  tags = { # TODO: simplify all resources with single tags map object
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 
 resource "azurerm_network_interface" "clients_network_interface" {
@@ -100,13 +88,7 @@ resource "azurerm_network_interface" "clients_network_interface" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.clients_public_ip[count.index].id
   }
-
-  tags = { # TODO: simplify all resources with single tags map object
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 
 # Wait for client cloud-init status to complete.  

@@ -3,12 +3,7 @@ resource "azurerm_virtual_network" "vm_p4_virtual_network" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
-  tags = {
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 
 resource "azurerm_subnet" "vm_p4_subnet" {
@@ -22,12 +17,7 @@ resource "azurerm_network_security_group" "p4_helix_core_sg" {
   name                = "p4_helix_core_sg"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
-  tags = {
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 
 resource "azurerm_network_security_rule" "helix_core_ssh_rule" {

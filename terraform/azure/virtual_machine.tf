@@ -16,6 +16,7 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
   location            = azurerm_resource_group.p4benchmark.location
   size                = "Standard_DS1_v2"
   admin_username      = "rocky"
+  user_data           = local.user_data
   network_interface_ids = [
     azurerm_network_interface.vm_p4_network.id,
   ]
@@ -23,28 +24,23 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
     username   = "rocky"
     public_key = file("~/.ssh/id_rsa.pub")
   }
-  user_data             = local.user_data
+
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
   source_image_reference {
     publisher = "perforce"
-    offer = "perforce-helix-core-offer"
-    sku = "p4d_2020_1_2107780_v2"
-    version = "1.9.5"
+    offer     = "perforce-helix-core-offer"
+    sku       = "p4d_2020_1_2107780_v2"
+    version   = "1.9.5"
   }
   plan {
-    name = "p4d_2020_1_2107780_v2"
+    name      = "p4d_2020_1_2107780_v2"
     publisher = "perforce"
-    product = "perforce-helix-core-offer"
+    product   = "perforce-helix-core-offer"
   }
-  tags = {
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 
 # Wait for helix core cloud-init status to complete.  
@@ -120,10 +116,7 @@ resource "azurerm_public_ip" "p4Benchmark_public_ip" {
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
   allocation_method   = "Static"
-
-  tags = {
-    environment = "Production"
-  }
+  tags                = local.tags
 }
 
 resource "azurerm_network_interface" "vm_p4_network" {
@@ -136,10 +129,5 @@ resource "azurerm_network_interface" "vm_p4_network" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.p4Benchmark_public_ip.id
   }
-  tags = {
-    Environment = var.environment
-    Owner       = var.owner
-    Product     = "Perforce P4 Benchmark"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
