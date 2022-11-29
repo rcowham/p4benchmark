@@ -1,17 +1,15 @@
 locals {
 
-  user_data = base64encode(templatefile("${path.module}/../scripts/helix-core-userdata.sh", {
-    environment          = var.environment
-    ssh_public_key       = tls_private_key.ssh-key.public_key_openssh
-    ssh_private_key      = tls_private_key.ssh-key.private_key_openssh
-    p4benchmark_os_user  = var.p4benchmark_os_user
-    s3_checkpoint_bucket = var.s3_checkpoint_bucket
-    license_filename     = var.license_filename
+  user_data = base64encode(templatefile("${path.module}/../scripts/helix-core-userdata-azure.sh", {
+    environment         = var.environment
+    ssh_public_key      = tls_private_key.ssh-key.public_key_openssh
+    ssh_private_key     = tls_private_key.ssh-key.private_key_openssh
+    p4benchmark_os_user = var.p4benchmark_os_user
   }))
 }
 
 resource "azurerm_linux_virtual_machine" "helix_core" {
-  name                = "p4Benchmark"
+  name                = "p4-benchmark-helix-core"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
   size                = "Standard_DS1_v2"
@@ -60,25 +58,6 @@ resource "null_resource" "helix_core_cloud_init_status" {
   }
 }
 
-resource "azurerm_managed_disk" "depot" {
-  name                 = "helix_core_depot"
-  resource_group_name  = azurerm_resource_group.p4benchmark.name
-  location             = azurerm_resource_group.p4benchmark.location
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = 32
-}
-
-resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_depot_disk" {
-  depends_on = [
-    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk, azurerm_virtual_machine_data_disk_attachment.helix_core_metadata_disk
-  ]
-  managed_disk_id    = azurerm_managed_disk.depot.id
-  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
-  lun                = "0"
-  caching            = "ReadWrite"
-}
-
 resource "azurerm_managed_disk" "log" {
   name                 = "helix_core_log"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
@@ -86,13 +65,6 @@ resource "azurerm_managed_disk" "log" {
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"
   disk_size_gb         = 32
-}
-
-resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_log_disk" {
-  managed_disk_id    = azurerm_managed_disk.log.id
-  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
-  lun                = "1"
-  caching            = "ReadWrite"
 }
 
 resource "azurerm_managed_disk" "metadata" {
@@ -104,8 +76,37 @@ resource "azurerm_managed_disk" "metadata" {
   disk_size_gb         = 32
 }
 
+resource "azurerm_managed_disk" "depot" {
+  name                 = "helix_core_depot"
+  resource_group_name  = azurerm_resource_group.p4benchmark.name
+  location             = azurerm_resource_group.p4benchmark.location
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = 32
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_log_disk" {
+  managed_disk_id    = azurerm_managed_disk.log.id
+  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
+  lun                = "0"
+  caching            = "ReadWrite"
+}
+
 resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_metadata_disk" {
+  depends_on = [
+    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk
+  ]
   managed_disk_id    = azurerm_managed_disk.metadata.id
+  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
+  lun                = "1"
+  caching            = "ReadWrite"
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_depot_disk" {
+  depends_on = [
+    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk, azurerm_virtual_machine_data_disk_attachment.helix_core_metadata_disk
+  ]
+  managed_disk_id    = azurerm_managed_disk.depot.id
   virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
   lun                = "2"
   caching            = "ReadWrite"
