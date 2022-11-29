@@ -41,7 +41,7 @@ resource "azurerm_linux_virtual_machine" "locustclients" {
 
   admin_ssh_key {
     username   = "rocky"
-    public_key = file("~/.ssh/id_rsa.pub") # TODO: grab key from Key Vault
+    public_key = data.azurerm_ssh_public_key.rocky-public-key.public_key
   }
 
   os_disk {
@@ -97,8 +97,7 @@ resource "null_resource" "client_cloud_init_status" {
     type        = "ssh"
     user        = "rocky"
     host        = azurerm_linux_virtual_machine.locustclients.0.public_ip_address
-    private_key = file("~/.ssh/id_rsa")
-
+    agent = true
   }
 
   provisioner "remote-exec" {

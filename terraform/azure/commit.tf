@@ -20,7 +20,7 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
   ]
   admin_ssh_key {
     username   = var.helix_core_admin_user
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = data.azurerm_ssh_public_key.rocky-public-key.public_key
   }
 
   os_disk {
@@ -49,7 +49,7 @@ resource "null_resource" "helix_core_cloud_init_status" {
     type        = "ssh"
     user        = var.helix_core_admin_user
     host        = azurerm_linux_virtual_machine.helix_core.public_ip_address
-    private_key = file("~/.ssh/id_rsa")
+    agent = true
   }
 
   provisioner "remote-exec" {

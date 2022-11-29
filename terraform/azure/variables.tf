@@ -252,3 +252,13 @@ variable "createfile_configs" {
     }
   ]
 }
+
+variable "key_name" {
+  description = "Key name of the existing Key Pair to use for all instances."
+  type        = string
+}
+
+variable "key_resource_group_name" {
+  description = "Resource Group name of the existing Key Pair to use for all instances."
+  type        = string
+}

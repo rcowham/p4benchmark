@@ -55,7 +55,7 @@ resource "azurerm_linux_virtual_machine" "driver" {
 
   admin_ssh_key {
     username   = "rocky"
-    public_key = file("~/.ssh/id_rsa.pub") # TODO key vault
+    public_key = data.azurerm_ssh_public_key.rocky-public-key.public_key
   }
 
   os_disk {
@@ -110,7 +110,7 @@ resource "null_resource" "driver_cloud_init_status" {
     type        = "ssh"
     user        = "rocky"
     host        = azurerm_linux_virtual_machine.driver.public_ip_address
-    private_key = file("~/.ssh/id_rsa")
+    agent = true
   }
 
   provisioner "remote-exec" {
@@ -127,7 +127,7 @@ resource "null_resource" "upload_create_files" {
     type        = "ssh"
     user        = "rocky"
     host        = azurerm_linux_virtual_machine.driver.public_ip_address
-    private_key = file("~/.ssh/id_rsa")
+    agent = true
   }
 
   provisioner "file" {
@@ -158,7 +158,7 @@ resource "null_resource" "run_create_files" {
     type        = "ssh"
     user        = "rocky"
     host        = azurerm_linux_virtual_machine.driver.public_ip_address
-    private_key = file("~/.ssh/id_rsa")
+    agent = true
   }
 
   provisioner "remote-exec" {
@@ -175,7 +175,7 @@ resource "null_resource" "apply_p4d_configurables" {
     type        = "ssh"
     user        = "rocky"
     host        = local.helix_core_public_ip
-    private_key = file("~/.ssh/id_rsa")
+    agent = true
   }
 
   provisioner "remote-exec" {
@@ -194,7 +194,7 @@ resource "null_resource" "remove_p4d_configurables" {
     type        = "ssh"
     user        = "rocky"
     host        = local.helix_core_public_ip
-    private_key = file("~/.ssh/id_rsa")
+    agent = true
   }
 
   provisioner "remote-exec" {

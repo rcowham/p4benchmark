@@ -60,3 +60,6 @@ override.tf.json
 terraform.rc
 
 .terraform.lock.hcl
+
+# Ignore private keys
+*.pem
