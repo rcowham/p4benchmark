@@ -1,3 +1,4 @@
+# Global Variables
 variable "environment" {
   description = "What environment is this for?  This value will be applied to all resources as a tag"
   type        = string
@@ -9,21 +10,110 @@ variable "owner" {
   type        = string
 }
 
-variable "helix_core_admin_user" {
-  description = "Admin user name for for the Virtual Machine with Helix-Core."
-  type        = string
-}
-
-variable "helix_core_admin_password" {
-  description = "Admin user password for for the Virtual Machine with Helix-Core."
-  type        = string
-}
-
 variable "azure_region" {
   description = "Azure region P4 benchmark infrastructure will be deployed into."
   type        = string
   default     = "eastus"
 }
+
+# Networking Variables
+variable "helix_core_ssh_allowed_ip" {
+  description = "Ip whitelist for SSH Helix Core access"
+  type        = string
+  default     = "200.80.77.193"
+}
+
+variable "helix_core_https_allowed_ip" {
+  description = "Ip whitelist for SSH Helix Core access"
+  type        = string
+  default     = "200.80.77.193"
+}
+
+variable "helix_core_1666_allowed_ip" {
+  description = "Ip whitelist for SSH Helix Core access"
+  type        = string
+  default     = "200.80.77.193"
+}
+
+variable "helix_core_hansoft_allowed_ip" {
+  description = "Ip whitelist for SSH Helix Core access"
+  type        = string
+  default     = "200.80.77.193"
+}
+
+variable "helix_core_http_allowed_ip" {
+  description = "Ip whitelist for SSH Helix Core access"
+  type        = string
+  default     = "200.80.77.193"
+}
+
+variable "helix_core_swarm_allowed_ip" {
+  description = "Ip whitelist for SSH Helix Core access"
+  type        = string
+  default     = "200.80.77.193"
+}
+# Helix Core VM Variables
+variable "helix_core_admin_user" {
+  description = "Admin user name for for the Virtual Machine with Helix-Core."
+  type        = string
+  default     = "rocky"
+}
+
+variable "helix_core_instance_type" {
+  description = "The type of instance for Helix-Core VM"
+  type        = string
+  default     = "Standard_DS1_v2"
+}
+
+variable "helix_core_root_volume_type" {
+  description = "The root volume type for Locust clients"
+  type        = string
+  default     = "Standard_LRS"
+}
+
+variable "helix_core_root_volume_size" {
+  description = "The size of the root volume for the Locust clients"
+  type        = number
+  default     = 100
+}
+
+variable "helix_core_log_volume_type" {
+  description = "The root volume type for Locust clients"
+  type        = string
+  default     = "Standard_LRS"
+}
+
+variable "helix_core_log_volume_size" {
+  description = "The size of the root volume for the Locust clients"
+  type        = number
+  default     = 50
+}
+
+variable "helix_core_metadata_volume_type" {
+  description = "The root volume type for Locust clients"
+  type        = string
+  default     = "Standard_LRS"
+}
+
+variable "helix_core_metadata_volume_size" {
+  description = "The size of the root volume for the Locust clients"
+  type        = number
+  default     = 64
+}
+
+variable "helix_core_depot_volume_type" {
+  description = "The root volume type for Locust clients"
+  type        = string
+  default     = "Standard_LRS"
+}
+
+variable "helix_core_depot_volume_size" {
+  description = "The size of the root volume for the Locust clients"
+  type        = number
+  default     = 512
+}
+
+# Shared Helix Core, Locust Clients And Driver VMs Variables
 
 variable "p4benchmark_os_user" {
   description = "What user Ansible should use for authenticating to all hosts"
@@ -31,18 +121,7 @@ variable "p4benchmark_os_user" {
   default     = "perforce"
 }
 
-variable "license_filename" {
-  description = "Name of the license file in S3"
-  type        = string
-  default     = ""
-}
-
-variable "s3_checkpoint_bucket" {
-  description = "Name of the S3 bucket that contains checkpoints"
-  type        = string
-  default     = ""
-}
-
+# Shared Locust Clients And Driver VMs Variables
 variable "helix_core_commit_benchmark_username" {
   description = "Username to use when running benchmark against Helix Core"
   type        = string
@@ -79,6 +158,7 @@ variable "locust_workspace_dir" {
   default     = "/p4/work"
 }
 
+# Locust Client VM variables
 variable "client_root_volume_size" {
   description = "The size of the root volume for the Locust clients"
   type        = number
@@ -103,6 +183,7 @@ variable "client_instance_type" {
   default     = "Standard_DS1_v2"
 }
 
+# Driver Client VM variables
 variable "helix_core_commit_username" {
   description = "Username to use for administoring Helix Core"
   type        = string

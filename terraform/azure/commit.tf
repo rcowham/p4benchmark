@@ -12,20 +12,21 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
   name                = "p4-benchmark-helix-core"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
-  size                = "Standard_DS1_v2"
-  admin_username      = "rocky"
+  size                = var.helix_core_instance_type
+  admin_username      = var.helix_core_admin_user
   user_data           = local.user_data
   network_interface_ids = [
     azurerm_network_interface.vm_p4_network.id,
   ]
   admin_ssh_key {
-    username   = "rocky"
+    username   = var.helix_core_admin_user
     public_key = file("~/.ssh/id_rsa.pub")
   }
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = var.helix_core_root_volume_type
+    disk_size_gb         = var.helix_core_root_volume_size
   }
   source_image_reference {
     publisher = "perforce"
@@ -46,7 +47,7 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
 resource "null_resource" "helix_core_cloud_init_status" {
   connection {
     type        = "ssh"
-    user        = "rocky"
+    user        = var.helix_core_admin_user
     host        = azurerm_linux_virtual_machine.helix_core.public_ip_address
     private_key = file("~/.ssh/id_rsa")
   }
@@ -62,27 +63,27 @@ resource "azurerm_managed_disk" "log" {
   name                 = "helix_core_log"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   location             = azurerm_resource_group.p4benchmark.location
-  storage_account_type = "Standard_LRS"
+  storage_account_type = var.helix_core_log_volume_type
   create_option        = "Empty"
-  disk_size_gb         = 32
+  disk_size_gb         = var.helix_core_log_volume_size
 }
 
 resource "azurerm_managed_disk" "metadata" {
   name                 = "helix_core_metadata"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   location             = azurerm_resource_group.p4benchmark.location
-  storage_account_type = "Standard_LRS"
+  storage_account_type = var.helix_core_metadata_volume_type
   create_option        = "Empty"
-  disk_size_gb         = 32
+  disk_size_gb         = var.helix_core_metadata_volume_size
 }
 
 resource "azurerm_managed_disk" "depot" {
   name                 = "helix_core_depot"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   location             = azurerm_resource_group.p4benchmark.location
-  storage_account_type = "Standard_LRS"
+  storage_account_type = var.helix_core_depot_volume_type
   create_option        = "Empty"
-  disk_size_gb         = 32
+  disk_size_gb         = var.helix_core_depot_volume_size
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_log_disk" {
