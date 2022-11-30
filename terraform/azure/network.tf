@@ -1,16 +1,24 @@
+locals {
+  subnets = cidrsubnets(var.vnet_cidr, 4, 4, 4, 4)
+}
+
 resource "azurerm_virtual_network" "vm_p4_virtual_network" {
-  name                = "vm_p4_virtual_network"
-  address_space       = ["10.0.0.0/16"]
+  name                = "p4benchmark"
+  address_space       = [var.vnet_cidr]
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
   tags                = local.tags
 }
 
+
+# CIDR blocks for rest of subnets if we need them:
+##  private_subnets = [local.subnets[2], local.subnets[3]]
+##  public_subnets  = [local.subnets[0], local.subnets[1]]
 resource "azurerm_subnet" "vm_p4_subnet" {
-  name                 = "vm_p4_subnet"
+  name                 = "public0"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   virtual_network_name = azurerm_virtual_network.vm_p4_virtual_network.name
-  address_prefixes     = ["10.0.2.0/24"]
+  address_prefixes     = [local.subnets[0]]
 }
 
 resource "azurerm_network_security_group" "p4_helix_core_sg" {
@@ -28,21 +36,7 @@ resource "azurerm_network_security_rule" "helix_core_ssh_rule" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = var.helix_core_ssh_allowed_ip
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.p4benchmark.name
-  network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
-}
-
-resource "azurerm_network_security_rule" "helix_core_https_rule" {
-  name                        = "HTTPS"
-  priority                    = 200
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "443"
-  source_address_prefix       = var.helix_core_https_allowed_ip
+  source_address_prefixes     = var.ingress_cidrs_22
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.p4benchmark.name
   network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
@@ -56,53 +50,12 @@ resource "azurerm_network_security_rule" "helix_core_perforce_rule" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "1666"
-  source_address_prefix       = var.helix_core_1666_allowed_ip
+  source_address_prefixes     = var.ingress_cidrs_1666
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.p4benchmark.name
   network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
 }
 
-resource "azurerm_network_security_rule" "helix_core_hansoft_rule" {
-  name                        = "Hansoft"
-  priority                    = 500
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "50256"
-  source_address_prefix       = var.helix_core_hansoft_allowed_ip
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.p4benchmark.name
-  network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
-}
-
-resource "azurerm_network_security_rule" "helix_core_http_rule" {
-  name                        = "HTTP"
-  priority                    = 600
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "80"
-  source_address_prefix       = var.helix_core_http_allowed_ip
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.p4benchmark.name
-  network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
-}
-
-resource "azurerm_network_security_rule" "helix_core_swarm_rule" {
-  name                        = "Swarm"
-  priority                    = 700
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "8443"
-  source_address_prefix       = var.helix_core_swarm_allowed_ip
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.p4benchmark.name
-  network_security_group_name = azurerm_network_security_group.p4_helix_core_sg.name
-}
 
 resource "azurerm_network_interface_security_group_association" "example" {
   network_interface_id      = azurerm_network_interface.vm_p4_network.id

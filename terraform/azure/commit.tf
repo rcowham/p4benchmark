@@ -16,7 +16,7 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
   admin_username      = var.helix_core_admin_user
   user_data           = local.user_data
   network_interface_ids = [
-    azurerm_network_interface.vm_p4_network.id,
+    azurerm_network_interface.vm_p4_network.id
   ]
   admin_ssh_key {
     username   = var.helix_core_admin_user

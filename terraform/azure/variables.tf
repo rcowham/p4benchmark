@@ -17,35 +17,24 @@ variable "azure_region" {
 }
 
 # Networking Variables
-variable "helix_core_ssh_allowed_ip" {
-  description = "Ip whitelist for SSH Helix Core access"
-  type        = string
+variable "ingress_cidrs_22" {
+  description = "IP whitelist for SSH access"
+  type        = list(string)
 }
 
-variable "helix_core_https_allowed_ip" {
+variable "ingress_cidrs_1666" {
   description = "Ip whitelist for SSH Helix Core access"
-  type        = string
+  type        = list(string)
 }
 
-variable "helix_core_1666_allowed_ip" {
-  description = "Ip whitelist for SSH Helix Core access"
+variable "vnet_cidr" {
+  description = "CIDR block to use for AWS VPC.  Subnets will be automatically calculated from this block."
   type        = string
+  default     = "10.0.0.0/16"
 }
 
-variable "helix_core_hansoft_allowed_ip" {
-  description = "Ip whitelist for SSH Helix Core access"
-  type        = string
-}
 
-variable "helix_core_http_allowed_ip" {
-  description = "Ip whitelist for SSH Helix Core access"
-  type        = string
-}
 
-variable "helix_core_swarm_allowed_ip" {
-  description = "Ip whitelist for SSH Helix Core access"
-  type        = string
-}
 # Helix Core VM Variables
 variable "helix_core_admin_user" {
   description = "Admin user name for for the Virtual Machine with Helix-Core."
