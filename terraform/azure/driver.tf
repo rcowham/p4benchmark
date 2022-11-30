@@ -168,7 +168,6 @@ resource "null_resource" "run_create_files" {
 }
 
 resource "null_resource" "apply_p4d_configurables" {
-  # TODO:
   depends_on = [null_resource.helix_core_cloud_init_status]
 
   connection {

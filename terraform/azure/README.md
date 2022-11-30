@@ -55,12 +55,6 @@ You can configure the variables by creating the file `terraform.tfvars` within t
 owner                         = "Christian Cabrer"
 key_name                      = "ccabrer"
 key_resource_group_name       = "ccabrer-keys"
-helix_core_ssh_allowed_ip     = "200.80.77.193"
-helix_core_https_allowed_ip   = "200.80.77.193"
-helix_core_1666_allowed_ip    = "200.80.77.193"
-helix_core_hansoft_allowed_ip = "200.80.77.193"
-helix_core_http_allowed_ip    = "200.80.77.193"
-helix_core_swarm_allowed_ip   = "200.80.77.193"
 ```
 
 Or you can do it using the .envrc file:
@@ -74,12 +68,8 @@ export TF_VAR_key_name=$key_name
 export TF_VAR_key_resource_group_name=$key_resource_group_name
 
 # Ip whitelist
-export TF_VAR_helix_core_ssh_allowed_ip="200.80.77.193"
-export TF_VAR_helix_core_https_allowed_ip="200.80.77.193"
-export TF_VAR_helix_core_1666_allowed_ip="200.80.77.193"
-export TF_VAR_helix_core_hansoft_allowed_ip="200.80.77.193"
-export TF_VAR_helix_core_http_allowed_ip="200.80.77.193"
-export TF_VAR_helix_core_swarm_allowed_ip="200.80.77.193"
+export TF_VAR_ingress_cidrs_22="200.80.77.193"
+export TF_VAR_ingress_cidrs_1666="200.80.77.193"
 ```
 
 6. Run Terraform
