@@ -1,16 +1,23 @@
 resource "azurerm_virtual_network" "vm_p4_virtual_network" {
   name                = "vm_p4_virtual_network"
-  address_space       = ["10.0.0.0/16"]
+  address_space       = ["10.0.0.0/22"]
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
   tags                = local.tags
 }
 
 resource "azurerm_subnet" "vm_p4_subnet" {
-  name                 = "vm_p4_subnet"
+  name                 = "vm_p4_public_subnet"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   virtual_network_name = azurerm_virtual_network.vm_p4_virtual_network.name
-  address_prefixes     = ["10.0.2.0/24"]
+  address_prefixes     = ["10.0.0.0/24"]
+}
+
+resource "azurerm_subnet" "vm_p4_private_subnet" {
+  name                 = "vm_p4_private_subnet"
+  resource_group_name  = azurerm_resource_group.p4benchmark.name
+  virtual_network_name = azurerm_virtual_network.vm_p4_virtual_network.name
+  address_prefixes     = ["10.0.1.0/24"]
 }
 
 resource "azurerm_network_security_group" "p4_helix_core_sg" {

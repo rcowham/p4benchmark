@@ -68,7 +68,7 @@ variable "helix_core_instance_type" {
 variable "helix_core_root_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_root_volume_size" {
@@ -80,7 +80,7 @@ variable "helix_core_root_volume_size" {
 variable "helix_core_log_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_log_volume_size" {
@@ -92,7 +92,7 @@ variable "helix_core_log_volume_size" {
 variable "helix_core_metadata_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_metadata_volume_size" {
@@ -104,13 +104,19 @@ variable "helix_core_metadata_volume_size" {
 variable "helix_core_depot_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_depot_volume_size" {
   description = "The size of the root volume for the Locust clients"
   type        = number
   default     = 512
+}
+
+variable "helix_core_public_domain_name_label" {
+  description = "An A record that starts with the specified label and resolves to the public IP address."
+  type        = string
+  default     = "p4benchmarkhelixcore"
 }
 
 # Shared Helix Core, Locust Clients And Driver VMs Variables
@@ -168,7 +174,7 @@ variable "client_root_volume_size" {
 variable "client_root_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "client_vm_count" {
@@ -235,7 +241,7 @@ variable "driver_root_volume_size" {
 variable "driver_root_volume_type" {
   description = "The root volume type for driver"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "createfile_configs" {
