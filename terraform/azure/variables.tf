@@ -28,7 +28,7 @@ variable "ingress_cidrs_1666" {
 }
 
 variable "vnet_cidr" {
-  description = "CIDR block to use for AWS VPC.  Subnets will be automatically calculated from this block."
+  description = "CIDR block to use for Azure VNET.  Subnets will be automatically calculated from this block."
   type        = string
   default     = "10.0.0.0/16"
 }
@@ -45,13 +45,13 @@ variable "helix_core_admin_user" {
 variable "helix_core_instance_type" {
   description = "The type of instance for Helix-Core VM"
   type        = string
-  default     = "Standard_DS1_v2"
+  default     = "Standard_D2_v4"
 }
 
 variable "helix_core_root_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_root_volume_size" {
@@ -63,7 +63,7 @@ variable "helix_core_root_volume_size" {
 variable "helix_core_log_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_log_volume_size" {
@@ -75,7 +75,7 @@ variable "helix_core_log_volume_size" {
 variable "helix_core_metadata_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_metadata_volume_size" {
@@ -87,7 +87,7 @@ variable "helix_core_metadata_volume_size" {
 variable "helix_core_depot_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "helix_core_depot_volume_size" {
@@ -151,7 +151,7 @@ variable "client_root_volume_size" {
 variable "client_root_volume_type" {
   description = "The root volume type for Locust clients"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "client_vm_count" {
@@ -163,7 +163,7 @@ variable "client_vm_count" {
 variable "client_instance_type" {
   description = "The type of instance to for Locust clients"
   type        = string
-  default     = "Standard_DS1_v2"
+  default     = "Standard_D2_v4"
 }
 
 # Driver Client VM variables
@@ -206,7 +206,7 @@ variable "locust_repeat" {
 variable "driver_instance_type" {
   description = "The type of instance to for driver"
   type        = string
-  default     = "Standard_DS1_v2"
+  default     = "Standard_D2_v4"
 }
 
 variable "driver_root_volume_size" {
@@ -218,7 +218,7 @@ variable "driver_root_volume_size" {
 variable "driver_root_volume_type" {
   description = "The root volume type for driver"
   type        = string
-  default     = "Standard_LRS"
+  default     = "StandardSSD_LRS"
 }
 
 variable "createfile_configs" {
