@@ -46,9 +46,9 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
 # This will cause terraform to not create the runner instance until helix core is finished
 resource "null_resource" "helix_core_cloud_init_status" {
   connection {
-    type        = "ssh"
-    user        = var.helix_core_admin_user
-    host        = azurerm_linux_virtual_machine.helix_core.public_ip_address
+    type  = "ssh"
+    user  = var.helix_core_admin_user
+    host  = azurerm_linux_virtual_machine.helix_core.public_ip_address
     agent = true
   }
 
@@ -117,6 +117,7 @@ resource "azurerm_public_ip" "p4Benchmark_public_ip" {
   name                = "p4Benchmark_public_ip"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
+  sku                 = "Standard"
   allocation_method   = "Static"
   tags                = local.tags
 }
