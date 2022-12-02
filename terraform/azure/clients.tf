@@ -1,8 +1,7 @@
 
 locals {
 
-  # clients_sg_ids   = ... # TODO: support NSGs and existing Helix Core deployment
-  client_subnet_id = azurerm_subnet.vm_p4_subnet.id # TODO: support existing Helix Core deployment
+  client_subnet_id = var.existing_vnet ? data.azurerm_subnet.existing_public_subnet[0].id : azurerm_subnet.vm_p4_subnet[0].id
 
   client_user_data = base64encode(templatefile("${path.module}/../scripts/client_userdata.sh", {
     environment         = var.environment

@@ -1,5 +1,7 @@
 locals {
 
+  helix_core_subnet_id = var.existing_vnet ? data.azurerm_subnet.existing_public_subnet[0].id : azurerm_subnet.vm_p4_subnet[0].id
+
   user_data = base64encode(templatefile("${path.module}/../scripts/helix-core-userdata-azure.sh", {
     environment         = var.environment
     ssh_public_key      = tls_private_key.ssh-key.public_key_openssh
@@ -12,6 +14,7 @@ locals {
 }
 
 resource "azurerm_linux_virtual_machine" "helix_core" {
+  count               = var.existing_helix_core ? 0 : 1
   name                = "p4-benchmark-helix-core"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
@@ -19,7 +22,7 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
   admin_username      = var.helix_core_admin_user
   user_data           = local.user_data
   network_interface_ids = [
-    azurerm_network_interface.vm_p4_network.id
+    azurerm_network_interface.vm_p4_network[0].id
   ]
   admin_ssh_key {
     username   = var.helix_core_admin_user
@@ -51,10 +54,11 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
 # Wait for helix core cloud-init status to complete.  
 # This will cause terraform to not create the runner instance until helix core is finished
 resource "null_resource" "helix_core_cloud_init_status" {
+  count = var.existing_helix_core ? 0 : 1
   connection {
     type  = "ssh"
     user  = var.helix_core_admin_user
-    host  = azurerm_linux_virtual_machine.helix_core.public_ip_address
+    host  = azurerm_linux_virtual_machine.helix_core[0].public_ip_address
     agent = true
   }
 
@@ -66,6 +70,7 @@ resource "null_resource" "helix_core_cloud_init_status" {
 }
 
 resource "azurerm_managed_disk" "log" {
+  count                = var.existing_helix_core ? 0 : 1
   name                 = "helix_core_log"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   location             = azurerm_resource_group.p4benchmark.location
@@ -75,6 +80,7 @@ resource "azurerm_managed_disk" "log" {
 }
 
 resource "azurerm_managed_disk" "metadata" {
+  count                = var.existing_helix_core ? 0 : 1
   name                 = "helix_core_metadata"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   location             = azurerm_resource_group.p4benchmark.location
@@ -84,6 +90,7 @@ resource "azurerm_managed_disk" "metadata" {
 }
 
 resource "azurerm_managed_disk" "depot" {
+  count                = var.existing_helix_core ? 0 : 1
   name                 = "helix_core_depot"
   resource_group_name  = azurerm_resource_group.p4benchmark.name
   location             = azurerm_resource_group.p4benchmark.location
@@ -93,33 +100,37 @@ resource "azurerm_managed_disk" "depot" {
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_log_disk" {
-  managed_disk_id    = azurerm_managed_disk.log.id
-  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
+  count              = var.existing_helix_core ? 0 : 1
+  managed_disk_id    = azurerm_managed_disk.log[0].id
+  virtual_machine_id = azurerm_linux_virtual_machine.helix_core[0].id
   lun                = "0"
   caching            = "ReadWrite"
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_metadata_disk" {
+  count = var.existing_helix_core ? 0 : 1
   depends_on = [
-    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk
+    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk[0]
   ]
-  managed_disk_id    = azurerm_managed_disk.metadata.id
-  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
+  managed_disk_id    = azurerm_managed_disk.metadata[0].id
+  virtual_machine_id = azurerm_linux_virtual_machine.helix_core[0].id
   lun                = "1"
   caching            = "ReadWrite"
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "helix_core_depot_disk" {
+  count = var.existing_helix_core ? 0 : 1
   depends_on = [
-    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk, azurerm_virtual_machine_data_disk_attachment.helix_core_metadata_disk
+    azurerm_virtual_machine_data_disk_attachment.helix_core_log_disk[0], azurerm_virtual_machine_data_disk_attachment.helix_core_metadata_disk[0]
   ]
-  managed_disk_id    = azurerm_managed_disk.depot.id
-  virtual_machine_id = azurerm_linux_virtual_machine.helix_core.id
+  managed_disk_id    = azurerm_managed_disk.depot[0].id
+  virtual_machine_id = azurerm_linux_virtual_machine.helix_core[0].id
   lun                = "2"
   caching            = "ReadWrite"
 }
 
 resource "azurerm_public_ip" "p4Benchmark_public_ip" {
+  count               = var.existing_helix_core ? 0 : 1
   name                = "p4Benchmark_public_ip"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
@@ -129,15 +140,16 @@ resource "azurerm_public_ip" "p4Benchmark_public_ip" {
 }
 
 resource "azurerm_network_interface" "vm_p4_network" {
+  count               = var.existing_helix_core ? 0 : 1
   name                = "vm_p4_network"
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.vm_p4_subnet.id
+    subnet_id                     = local.helix_core_subnet_id
     private_ip_address_allocation = var.helix_coreprivate_ip != "" ? "Static" : "Dynamic"
     private_ip_address            = var.helix_coreprivate_ip
-    public_ip_address_id          = azurerm_public_ip.p4Benchmark_public_ip.id
+    public_ip_address_id          = azurerm_public_ip.p4Benchmark_public_ip[0].id
   }
   tags = local.tags
 }
