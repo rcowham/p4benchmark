@@ -36,8 +36,7 @@ resource "azurerm_linux_virtual_machine" "locustclients" {
   network_interface_ids = [
     azurerm_network_interface.clients_network_interface[count.index].id,
   ]
-  user_data                  = local.client_user_data
-  encryption_at_host_enabled = true
+  user_data = local.client_user_data
 
   admin_ssh_key {
     username   = "rocky"
@@ -94,9 +93,9 @@ resource "azurerm_network_interface" "clients_network_interface" {
 # This will cause terraform to not create the driver instance until client is finished
 resource "null_resource" "client_cloud_init_status" {
   connection {
-    type        = "ssh"
-    user        = "rocky"
-    host        = azurerm_linux_virtual_machine.locustclients.0.public_ip_address
+    type  = "ssh"
+    user  = "rocky"
+    host  = azurerm_linux_virtual_machine.locustclients.0.public_ip_address
     agent = true
   }
 

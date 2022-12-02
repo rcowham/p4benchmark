@@ -42,16 +42,15 @@ locals {
 }
 
 resource "azurerm_linux_virtual_machine" "driver" {
-  name                       = "p4-benchmark-driver"
-  depends_on                 = [null_resource.helix_core_cloud_init_status, null_resource.client_cloud_init_status]
-  resource_group_name        = azurerm_resource_group.p4benchmark.name
-  location                   = azurerm_resource_group.p4benchmark.location
-  size                       = var.driver_instance_type
-  admin_username             = "rocky"
-  network_interface_ids      = [azurerm_network_interface.driver_network_interface.id]
-  encryption_at_host_enabled = true
-  user_data                  = local.driver_user_data
-  # TODO monitoring, IAM, NSGs
+  name                  = "p4-benchmark-driver"
+  depends_on            = [null_resource.helix_core_cloud_init_status, null_resource.client_cloud_init_status]
+  resource_group_name   = azurerm_resource_group.p4benchmark.name
+  location              = azurerm_resource_group.p4benchmark.location
+  size                  = var.driver_instance_type
+  admin_username        = "rocky"
+  network_interface_ids = [azurerm_network_interface.driver_network_interface.id]
+  user_data             = local.driver_user_data
+  # TODO monitoring, IAM
 
   admin_ssh_key {
     username   = "rocky"
@@ -107,9 +106,9 @@ resource "azurerm_network_interface" "driver_network_interface" {
 # Wait for cloud-init status to complete.
 resource "null_resource" "driver_cloud_init_status" {
   connection {
-    type        = "ssh"
-    user        = "rocky"
-    host        = azurerm_linux_virtual_machine.driver.public_ip_address
+    type  = "ssh"
+    user  = "rocky"
+    host  = azurerm_linux_virtual_machine.driver.public_ip_address
     agent = true
   }
 
@@ -124,9 +123,9 @@ resource "null_resource" "upload_create_files" {
   depends_on = [null_resource.driver_cloud_init_status]
 
   connection {
-    type        = "ssh"
-    user        = "rocky"
-    host        = azurerm_linux_virtual_machine.driver.public_ip_address
+    type  = "ssh"
+    user  = "rocky"
+    host  = azurerm_linux_virtual_machine.driver.public_ip_address
     agent = true
   }
 
@@ -155,9 +154,9 @@ resource "null_resource" "run_create_files" {
   count      = length(var.createfile_configs)
 
   connection {
-    type        = "ssh"
-    user        = "rocky"
-    host        = azurerm_linux_virtual_machine.driver.public_ip_address
+    type  = "ssh"
+    user  = "rocky"
+    host  = azurerm_linux_virtual_machine.driver.public_ip_address
     agent = true
   }
 
@@ -171,9 +170,9 @@ resource "null_resource" "apply_p4d_configurables" {
   depends_on = [null_resource.helix_core_cloud_init_status]
 
   connection {
-    type        = "ssh"
-    user        = "rocky"
-    host        = local.helix_core_public_ip
+    type  = "ssh"
+    user  = "rocky"
+    host  = local.helix_core_public_ip
     agent = true
   }
 
@@ -190,9 +189,9 @@ resource "null_resource" "remove_p4d_configurables" {
   depends_on = [null_resource.run_create_files, null_resource.apply_p4d_configurables]
 
   connection {
-    type        = "ssh"
-    user        = "rocky"
-    host        = local.helix_core_public_ip
+    type  = "ssh"
+    user  = "rocky"
+    host  = local.helix_core_public_ip
     agent = true
   }
 

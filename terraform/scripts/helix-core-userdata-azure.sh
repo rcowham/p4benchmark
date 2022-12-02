@@ -39,6 +39,7 @@ default_userdata_script() {
     hostname "$HOSTNAME"
     echo "$HOSTNAME" > /etc/hostname
 
+    export DEPOT_DEVICE="$(lsscsi [1:0:0:2] | awk '{print $7}')"
     counter=0
     while [ ! -e "$DEPOT_DEVICE" ]; do
         echo "Waiting for $DEPOT_DEVICE to be attached..."
@@ -48,8 +49,11 @@ default_userdata_script() {
             echo "Counter expired waiting for $DEPOT_DEVICE to be attached"
             exit 1
         fi
+        export DEPOT_DEVICE="$(lsscsi [1:0:0:2] | awk '{print $7}')"
     done
 
+    export LOG_DEVICE="$(lsscsi [1:0:0:0] | awk '{print $7}')"
+    export METADATA_DEVICE="$(lsscsi [1:0:0:1] | awk '{print $7}')"
 
     # The AMI is baked with /hx* on the EC2 root volume.  
     # Now that we are starting from CloudFormation we can utilize seperate volumes
@@ -210,10 +214,6 @@ export DEPOT_CONTENT_SNAPSHOT=""
 # export AWS_REGION=$(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
 
 export P4D_AUTH_ID="commit"
-export DEPOT_DEVICE="/dev/sde"
-export LOG_DEVICE="/dev/sdc"
-export METADATA_DEVICE="/dev/sdd"
-
 
 run-parts /home/perforce/.userdata/custom-pre/
 
