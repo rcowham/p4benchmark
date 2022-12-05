@@ -245,3 +245,9 @@ variable "key_resource_group_name" {
   description = "Resource Group name of the existing Key Pair to use for all instances."
   type        = string
 }
+
+variable "helix_coreprivate_ip" {
+  description = "Private IP address to associate with the Helix Core instance in a VNET. Leave as an empty string to allow DHCP to assign IP address."
+  type        = string
+  default     = ""
+}

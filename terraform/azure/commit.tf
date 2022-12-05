@@ -129,7 +129,8 @@ resource "azurerm_network_interface" "vm_p4_network" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.vm_p4_subnet.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = var.helix_coreprivate_ip != "" ? "Static" : "Dynamic"
+    private_ip_address            = var.helix_coreprivate_ip
     public_ip_address_id          = azurerm_public_ip.p4Benchmark_public_ip.id
   }
   tags = local.tags
