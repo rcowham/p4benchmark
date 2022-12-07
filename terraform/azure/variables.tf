@@ -267,5 +267,5 @@ variable "blob_container" {
 variable "license_filename" {
   description = "Name of the license file in Blob Storage."
   type        = string
-  default     = ""
+  default     = "license"
 }
