@@ -5,6 +5,9 @@ locals {
     ssh_public_key      = tls_private_key.ssh-key.public_key_openssh
     ssh_private_key     = tls_private_key.ssh-key.private_key_openssh
     p4benchmark_os_user = var.p4benchmark_os_user
+    license_filename    = var.license_filename
+    blob_account_name   = var.blob_account_name
+    blob_container      = var.blob_container
   }))
 }
 
@@ -38,6 +41,9 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
     name      = "p4d_2020_1_2107780_v2"
     publisher = "perforce"
     product   = "perforce-helix-core-offer"
+  }
+  identity {
+    type = "SystemAssigned"
   }
   tags = local.tags
 }

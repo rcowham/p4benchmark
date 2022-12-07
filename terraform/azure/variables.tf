@@ -251,3 +251,21 @@ variable "helix_coreprivate_ip" {
   type        = string
   default     = ""
 }
+
+variable "blob_account_name" {
+  description = "Name of the Account Name in Blob Storage."
+  type        = string
+  default     = ""
+}
+
+variable "blob_container" {
+  description = "Name of the Container in Blob Storage which stores the license."
+  type        = string
+  default     = ""
+}
+
+variable "license_filename" {
+  description = "Name of the license file in Blob Storage."
+  type        = string
+  default     = ""
+}

@@ -223,4 +223,20 @@ default_userdata_script
 
 run-parts /home/perforce/.userdata/custom-post/
 
-# TODO: Add support for adding a license in Azure Virtual Machine
+if [[ "${license_filename}" != '' ]] ;
+then
+    echo "Pulling down license file from Blob Storage..."
+
+    # TODO: finish support for restoring from archive.tar and checkpoint
+      
+    # Install azcopy and login
+    wget -O azcopy_v10.tar.gz https://aka.ms/downloadazcopy-v10-linux && tar -xf azcopy_v10.tar.gz --strip-components=1
+    ./azcopy login --identity
+
+    # Download license file
+    ./azcopy copy https://${blob_account_name}.blob.core.windows.net/${blob_container}/${license_filename} /p4/1/root/license
+
+    service p4d_1 restart
+    sleep 10  
+    echo "Finished applying the license"
+fi
