@@ -1,14 +1,12 @@
 
 locals {
 
-  # driver_sg_ids    = var.existing_vpc ? concat(var.existing_sg_ids, [module.driver_sg.security_group_id]) : [module.driver_sg.security_group_id]
-  driver_subnet_id = azurerm_subnet.vm_p4_subnet.id # TODO: support existing deployments
+  driver_subnet_id = var.existing_vnet ? data.azurerm_subnet.existing_public_subnet[0].id : azurerm_subnet.vm_p4_subnet[0].id
 
-  helix_core_commit_username = var.helix_core_commit_username
-  # TODO: support exsiting Helix deployments and connection to commit server
-  helix_core_commit_password = azurerm_linux_virtual_machine.helix_core.virtual_machine_id
-  helix_core_private_ip      = azurerm_linux_virtual_machine.helix_core.private_ip_address
-  helix_core_public_ip       = azurerm_linux_virtual_machine.helix_core.public_ip_address
+  helix_core_commit_username = var.existing_helix_core ? var.existing_helix_core_username : var.helix_core_commit_username
+  helix_core_commit_password = var.existing_helix_core ? var.existing_helix_core_password : azurerm_linux_virtual_machine.helix_core[0].virtual_machine_id
+  helix_core_private_ip      = var.existing_helix_core ? var.existing_helix_core_ip : azurerm_linux_virtual_machine.helix_core[0].private_ip_address
+  helix_core_public_ip       = var.existing_helix_core ? var.existing_helix_core_public_ip : azurerm_linux_virtual_machine.helix_core[0].public_ip_address
 
   driver_user_data = base64encode(templatefile("${path.module}/../scripts/driver_userdata.sh", {
     environment                          = var.environment

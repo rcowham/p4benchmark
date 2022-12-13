@@ -96,6 +96,60 @@ variable "helix_core_depot_volume_size" {
   default     = 512
 }
 
+variable "existing_vnet" {
+  description = "Whether or not to use an existing vnet or create one"
+  type        = bool
+  default     = false
+}
+
+variable "existing_helix_core" {
+  description = "Whether or not to use an existing Helix Core or create one"
+  type        = bool
+  default     = false
+}
+
+variable "existing_vnet_resource_group" {
+  description = "Existing resource group to which the VNet belongs"
+  type        = string
+  default     = ""
+}
+
+variable "existing_vnet_name" {
+  description = "Existing VNet name to use for VM deployments"
+  type        = string
+  default     = ""
+}
+
+variable "existing_subnet_name" {
+  description = "Existing subnet name to use for VM deployments"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_ip" {
+  description = "Existing helix core IP for locust clients to use for P4PORT"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_public_ip" {
+  description = "Existing helix core public IP for terraform to connect via remote-exec for configuration"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_username" {
+  description = "Existing helix core username for locust clients to use for P4USER"
+  type        = string
+  default     = ""
+}
+
+variable "existing_helix_core_password" {
+  description = "Existing helix core password for locust clients to use for p4 login"
+  type        = string
+  default     = ""
+}
+
 # Shared Helix Core, Locust Clients And Driver VMs Variables
 
 variable "p4benchmark_os_user" {

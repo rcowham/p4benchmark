@@ -15,15 +15,15 @@ output "driver_public_ip" {
 
 output "helix_core_commit_public_ip" {
   description = "Helix Core public IP address"
-  value       = azurerm_linux_virtual_machine.helix_core.public_ip_address
+  value       = var.existing_helix_core ? null : azurerm_linux_virtual_machine.helix_core[0].public_ip_address
 }
 
 output "helix_core_commit_private_ip" {
   description = "Helix Core private IP address"
-  value       = azurerm_linux_virtual_machine.helix_core.private_ip_address
+  value       = var.existing_helix_core ? null : azurerm_linux_virtual_machine.helix_core[0].private_ip_address
 }
 
 output "helix_core_commit_instance_id" {
   description = "Helix Core Instance ID - This is the password for the perforce user"
-  value       = azurerm_linux_virtual_machine.helix_core.virtual_machine_id
+  value       = var.existing_helix_core ? null : azurerm_linux_virtual_machine.helix_core[0].virtual_machine_id
 }
