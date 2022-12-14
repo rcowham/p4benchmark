@@ -73,6 +73,6 @@ EOF
 # the user data cant do a login at this point because the p4benchmark_os_user is created by the driver
 # vm which is created after the client VMs
 export P4TRUST="/home/${p4benchmark_os_user}/.p4trust"
-export P4PORT="ssl:${helix_core_private_ip}:1666"
+export P4PORT="ssl:${helix_core_private_ip}:${helix_core_port}"
 p4 trust -y
 chown ${p4benchmark_os_user}:${p4benchmark_os_user} /home/${p4benchmark_os_user}/.p4*

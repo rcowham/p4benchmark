@@ -28,6 +28,7 @@ locals {
     locust_repeat                        = var.locust_repeat
     p4benchmark_dir                      = var.p4benchmark_dir
     locust_workspace_dir                 = var.locust_workspace_dir
+    helix_core_port                      = var.helix_core_port
 
   }))
 
@@ -36,6 +37,7 @@ locals {
     helix_core_commit_benchmark_username = var.helix_core_commit_benchmark_username
     helix_core_password                  = local.helix_core_commit_password
     helix_core_private_ip                = local.helix_core_private_ip
+    helix_core_port                      = var.helix_core_port
   })
 }
 
@@ -165,6 +167,7 @@ resource "null_resource" "run_create_files" {
 }
 
 resource "null_resource" "apply_p4d_configurables" {
+  count               = var.apply_p4d_configurables ? 1 : 0
   depends_on = [null_resource.helix_core_cloud_init_status]
 
   connection {
@@ -184,6 +187,7 @@ resource "null_resource" "apply_p4d_configurables" {
 }
 
 resource "null_resource" "remove_p4d_configurables" {
+  count               = var.apply_p4d_configurables ? 1 : 0
   depends_on = [null_resource.run_create_files, null_resource.apply_p4d_configurables]
 
   connection {

@@ -267,6 +267,13 @@ variable "p4benchmark_github_branch" {
   default     = "main"
 }
 
+# TOOD: should this variable go away and we just use existing_helix_core_public_ip be set or null???
+variable "apply_p4d_configurables" {
+  description = "Wether or not to apply p4d configurables before create files is executed to improve throughput"
+  type        = bool
+  default     = false
+}
+
 variable "createfile_configs" {
   description = "createfile_configs is an array of maps.  Each object will be passed to createfiles.py.  Use an empty array if you want to skip running createfiles.py from terraform"
   type        = list(map(string))
@@ -388,6 +395,12 @@ variable "existing_helix_core_public_ip" {
   description = "Existing helix core public IP for terraform to connect via remote-exec for configuration"
   type        = string
   default     = ""
+}
+
+variable "helix_core_port" {
+  description = "Existing helix core listening port"
+  type        = string
+  default     = "1666"
 }
 
 variable "existing_helix_core_port" {

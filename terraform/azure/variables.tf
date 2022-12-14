@@ -138,6 +138,19 @@ variable "existing_helix_core_public_ip" {
   default     = ""
 }
 
+variable "helix_core_port" {
+  description = "Existing helix core listening port"
+  type        = string
+  default     = "1666"
+}
+
+# TOOD: should this variable go away and we just use existing_helix_core_public_ip be set or null???
+variable "apply_p4d_configurables" {
+  description = "Wether or not to apply p4d configurables before create files is executed to improve throughput"
+  type        = bool
+  default     = false
+}
+
 variable "existing_helix_core_username" {
   description = "Existing helix core username for locust clients to use for P4USER"
   type        = string

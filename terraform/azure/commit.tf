@@ -53,6 +53,8 @@ resource "azurerm_linux_virtual_machine" "helix_core" {
 
 # Wait for helix core cloud-init status to complete.  
 # This will cause terraform to not create the runner instance until helix core is finished
+# we only run this status check on VM based helix core instance 
+# when helix core is containerized there wont be cloud-init
 resource "null_resource" "helix_core_cloud_init_status" {
   count = var.existing_helix_core ? 0 : 1
   connection {
