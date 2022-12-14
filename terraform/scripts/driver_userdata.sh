@@ -33,7 +33,7 @@ export PATH="\$PATH:/usr/local/bin"
 export ANSIBLE_HOSTS="hosts.yaml"
 
 export P4USER="${helix_core_commit_benchmark_username}"
-export P4PORT="ssl:${helix_core_private_ip}:1666"
+export P4PORT="ssl:${helix_core_private_ip}:${helix_core_port}"
 export P4TRUST=/root/.p4trust
 export P4TICKETS=/root/.p4tickets
 EOF
@@ -95,7 +95,7 @@ all:
         # The perforce SDP instance
         sdp_instance: 1
         # The port to use
-        p4port: 1666
+        p4port: ${helix_core_port}
         # Number of workers per bench_client
         num_workers: ${number_locust_workers}
 
@@ -104,7 +104,7 @@ all:
         perforce:
             # Array of ports - can include ssl prefix. Allows for random selection of commit/edge servers
             port:
-            - ssl:${helix_core_private_ip}:1666
+            - ssl:${helix_core_private_ip}:${helix_core_port}
             user:       ${helix_core_commit_benchmark_username}
             charset:
             password:   ${helix_core_password}
@@ -219,7 +219,7 @@ gunzip log2sql-linux-amd64.gz
 mv log2sql-linux-amd64 log2sql
 chmod +x log2sql
 
-export P4PORT="ssl:${helix_core_private_ip}:1666"
+export P4PORT="ssl:${helix_core_private_ip}:${helix_core_port}"
 export P4TRUST=/root/.p4trust
 export P4TICKETS=/root/.p4tickets
 export P4USER="${helix_core_commit_username}"

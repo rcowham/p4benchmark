@@ -54,7 +54,7 @@ resource "azurerm_network_security_rule" "helix_core_perforce_rule" {
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  destination_port_range      = "1666"
+  destination_port_range      = var.helix_core_port
   source_address_prefixes     = var.ingress_cidrs_1666
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.p4benchmark.name

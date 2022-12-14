@@ -12,6 +12,7 @@ locals {
     helix_core_commit_benchmark_username = var.helix_core_commit_benchmark_username
     helix_core_password                  = local.helix_core_commit_password
     helix_core_private_ip                = local.helix_core_private_ip
+    helix_core_port                      = var.helix_core_port
 
     git_project = var.p4benchmark_github_project
     git_branch  = var.p4benchmark_github_branch
