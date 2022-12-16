@@ -128,7 +128,7 @@ echo "" >> $sqlreport
 cat $sqlreport
 
 grep parallel config.out
-grep workspace_root config_p4_*.yml | grep -v "#"
+grep workspace_root $ANSIBLE_HOSTS | grep -v "#"
 
 echo ""
 echo "Workspace sizes on commit (for cross check)"

@@ -336,3 +336,9 @@ variable "license_filename" {
   type        = string
   default     = "license"
 }
+
+variable "prevent_deletion_if_contains_resources" {
+  description = "Wether or not Terraform should delete the resource group if it contains resources that were created outside of Terraform."
+  type = bool
+  default = false
+}

@@ -223,7 +223,7 @@ default_userdata_script
 
 run-parts /home/perforce/.userdata/custom-post/
 
-if [[ "${license_filename}" != '' ]] ;
+if [[ "${blob_container}" != '' ]] ;
 then
     echo "Pulling down license file from Blob Storage..."
 
