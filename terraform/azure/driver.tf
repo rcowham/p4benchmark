@@ -83,9 +83,9 @@ resource "azurerm_public_ip" "driver_public_ip" {
   name                = "p4-benchmark-driver-publicip"
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
-  allocation_method   = "Dynamic"
-
-  tags = local.tags
+  allocation_method   = var.allocation_method
+  sku                 = var.sku
+  tags                = local.tags
 }
 
 resource "azurerm_network_interface" "driver_network_interface" {
@@ -167,7 +167,7 @@ resource "null_resource" "run_create_files" {
 }
 
 resource "null_resource" "apply_p4d_configurables" {
-  count               = var.apply_p4d_configurables ? 1 : 0
+  count      = var.apply_p4d_configurables ? 1 : 0
   depends_on = [null_resource.helix_core_cloud_init_status]
 
   connection {
@@ -187,7 +187,7 @@ resource "null_resource" "apply_p4d_configurables" {
 }
 
 resource "null_resource" "remove_p4d_configurables" {
-  count               = var.apply_p4d_configurables ? 1 : 0
+  count      = var.apply_p4d_configurables ? 1 : 0
   depends_on = [null_resource.run_create_files, null_resource.apply_p4d_configurables]
 
   connection {

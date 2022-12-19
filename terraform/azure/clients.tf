@@ -70,7 +70,8 @@ resource "azurerm_public_ip" "clients_public_ip" {
   name                = format("p4-benchmark-locust-client-publicip-%03d", count.index + 1)
   location            = azurerm_resource_group.p4benchmark.location
   resource_group_name = azurerm_resource_group.p4benchmark.name
-  allocation_method   = "Dynamic"
+  allocation_method   = var.allocation_method
+  sku                 = var.sku
   tags                = local.tags
 }
 

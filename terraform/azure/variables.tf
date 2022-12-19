@@ -33,7 +33,17 @@ variable "vnet_cidr" {
   default     = "10.0.0.0/16"
 }
 
+variable "allocation_method" {
+  description = "Allocation method for the public IPs"
+  type        = string
+  default     = "Static"
+}
 
+variable "sku" {
+  description = "sku for the public IPs"
+  type        = string
+  default     = "Standard"
+}
 
 # Helix Core VM Variables
 variable "helix_core_admin_user" {

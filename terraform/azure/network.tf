@@ -107,6 +107,34 @@ resource "azurerm_network_interface_security_group_association" "vnet_driver_sg_
   network_security_group_id = azurerm_network_security_group.p4_driver_sg.id
 }
 
+
+resource "azurerm_network_security_group" "p4_client_sg" {
+  name                = "p4_client_sg"
+  resource_group_name = azurerm_resource_group.p4benchmark.name
+  location            = azurerm_resource_group.p4benchmark.location
+  tags                = local.tags
+}
+
+resource "azurerm_network_security_rule" "client_ssh_rule" {
+  name                        = "SSH"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefixes     = var.ingress_cidrs_22
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.p4benchmark.name
+  network_security_group_name = azurerm_network_security_group.p4_client_sg.name
+}
+
+resource "azurerm_network_interface_security_group_association" "vnet_client_sg_association" {
+  count                     = length(azurerm_network_interface.clients_network_interface.*.id)
+  network_interface_id      = element(azurerm_network_interface.clients_network_interface.*.id, count.index)
+  network_security_group_id = azurerm_network_security_group.p4_client_sg.id
+}
+
 data "azurerm_subnet" "existing_public_subnet" {
   count                = var.existing_vnet ? 1 : 0
   name                 = var.existing_subnet_name
