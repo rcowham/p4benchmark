@@ -136,8 +136,8 @@ resource "azurerm_public_ip" "p4Benchmark_public_ip" {
   name                = "p4Benchmark_public_ip"
   resource_group_name = azurerm_resource_group.p4benchmark.name
   location            = azurerm_resource_group.p4benchmark.location
-  sku                 = "Standard"
-  allocation_method   = "Static"
+  allocation_method   = var.public_ips_allocation_method
+  sku                 = var.public_ips_sku
   tags                = local.tags
 }
 
