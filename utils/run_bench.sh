@@ -3,6 +3,12 @@
 # Usage:
 #   ./run_bench.sh 1 basic
 #   ./run_bench.sh 1 syncbench
+# If you do not have SSH access to the commit server add the third argument to avoid
+# the execution of the steps which requires it. 
+# The variable AVOID_SSH_EXECUTIONS will be set with the input and the default value is false.
+# Usage:
+#   ./run_bench.sh 1 basic true
+#   ./run_bench.sh 1 syncbench true
 # Specify the p4d instance (SDP installed port) and the name of the benchmark script:
 #   basic/syncbench - corresponds to 2 files - locust_files/p4_basic.py or p4_syncbench.py and
 # their config_p4_basic.py etc.
@@ -27,6 +33,9 @@ P4BENCH_SCRIPT=${2:-Unset}
 [[ $P4BENCH_SCRIPT == "Unset" ]] && bail "Specify P4BENCH_SCRIPT as second parameter"
 [[ ! -f locust_files/p4_$P4BENCH_SCRIPT.py ]] && bail "Benchmark script $P4BENCH_SCRIPT not found: locust_files/p4_$P4BENCH_SCRIPT.py"
 
+AVOID_SSH_EXECUTIONS=${3:-false}
+echo "Avoid ssh executions: ${AVOID_SSH_EXECUTIONS}"
+
 export DEFAULT_ROUTE_INTERFACE=$(ip route  | grep default | awk '{print $5}')
 export P4BENCH_HOST=$(ifconfig $DEFAULT_ROUTE_INTERFACE | grep "inet " | awk '{print $2}')
 export P4BENCH_SCRIPT
@@ -44,12 +53,12 @@ $P4BENCH_UTILS/del_clients.sh $instance
 rm -f logs/*worker*.out logs/*log
 echo "Removing remote logs..."
 ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_client_logs.yml > /dev/null
-ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
+[[ $AVOID_SSH_EXECUTIONS != "true" ]] && ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
 ansible-playbook -i $ANSIBLE_HOSTS ansible/post_previous_client_bench.yml
 ansible-playbook -i $ANSIBLE_HOSTS ansible/pre_client_bench.yml
 
 # Flush filesystem caches on server
-ansible-playbook -i $ANSIBLE_HOSTS ansible/flush_server_cache.yml
+[[ $AVOID_SSH_EXECUTIONS != "true" ]] && ansible-playbook -i $ANSIBLE_HOSTS ansible/flush_server_cache.yml
 
 # Run the locust master - waiting for clients to connect and then spawn client worker jobs
 $P4BENCH_UTILS/run_locust_master.sh
