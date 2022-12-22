@@ -222,7 +222,7 @@ variable "locust_workspace_dir" {
 variable "client_root_volume_size" {
   description = "The size of the root volume for the Locust clients"
   type        = number
-  default     = 100
+  default     = 300
 }
 
 variable "client_root_volume_type" {
@@ -271,13 +271,13 @@ variable "locust_repo_path" {
 variable "locust_repo_dir_num" {
   description = "Number of entires to select from p4 dirs output.  p4 dirs output will be limited by value of locust_repo_path"
   type        = string
-  default     = "5"
+  default     = "10"
 }
 
 variable "locust_repeat" {
   description = "How many times the locust client will repeat the loop"
   type        = string
-  default     = "5"
+  default     = "10"
 }
 
 variable "driver_instance_type" {
