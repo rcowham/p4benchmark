@@ -8,7 +8,7 @@ locals {
   helix_core_commit_password = var.existing_helix_core ? var.existing_helix_core_password : aws_instance.helix_core[0].id
   helix_core_private_ip      = var.existing_helix_core ? var.existing_helix_core_ip : aws_instance.helix_core[0].private_ip
   helix_core_public_ip       = var.existing_helix_core ? var.existing_helix_core_public_ip : aws_instance.helix_core[0].public_ip
-  helix_core_port = var.helix_core_port
+  helix_core_port            = var.helix_core_port
 
   driver_user_data = templatefile("${path.module}/../scripts/driver_userdata.sh", {
     environment                          = var.environment
@@ -30,7 +30,7 @@ locals {
     locust_repeat                        = var.locust_repeat
     p4benchmark_dir                      = var.p4benchmark_dir
     locust_workspace_dir                 = var.locust_workspace_dir
-
+    avoid_ssh_connection                 = var.driver_avoid_ssh_connection
   })
 
   create_files_template = templatefile("${path.module}/../scripts/create_files.sh", {
@@ -38,7 +38,7 @@ locals {
     helix_core_commit_benchmark_username = var.helix_core_commit_benchmark_username
     helix_core_password                  = local.helix_core_commit_password
     helix_core_private_ip                = local.helix_core_private_ip
-    helix_core_port = var.helix_core_port
+    helix_core_port                      = var.helix_core_port
   })
 }
 

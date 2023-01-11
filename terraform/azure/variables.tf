@@ -298,6 +298,12 @@ variable "driver_root_volume_type" {
   default     = "StandardSSD_LRS"
 }
 
+variable "driver_avoid_ssh_connection" {
+  description = "Avoid SSH connections between driver and commit VMs"
+  type        = string
+  default     = "false"
+}
+
 variable "createfile_configs" {
   description = "createfile_configs is an array of maps.  Each object will be passed to createfiles.py.  Use an empty array if you want to skip running createfiles.py from terraform"
   type        = list(map(string))
@@ -349,6 +355,6 @@ variable "license_filename" {
 
 variable "prevent_deletion_if_contains_resources" {
   description = "Wether or not Terraform should delete the resource group if it contains resources that were created outside of Terraform."
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }

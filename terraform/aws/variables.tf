@@ -249,6 +249,12 @@ variable "driver_root_volume_type" {
   default     = "gp2"
 }
 
+variable "driver_avoid_ssh_connection" {
+  description = "Avoid SSH connections between driver and commit VMs"
+  type        = string
+  default     = "false"
+}
+
 variable "p4benchmark_github_project_owner" {
   description = "GitHub owner of the p4benchmark project"
   type        = string

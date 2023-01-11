@@ -98,6 +98,8 @@ all:
         p4port: ${helix_core_port}
         # Number of workers per bench_client
         num_workers: ${number_locust_workers}
+        # Avoid SSH connections between the driver and the commit machines
+        avoid_ssh_connection: ${avoid_ssh_connection}
 
         # Perforce benchmark testing parameters
         # Specify password if required
