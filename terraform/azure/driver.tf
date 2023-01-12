@@ -29,7 +29,7 @@ locals {
     p4benchmark_dir                      = var.p4benchmark_dir
     locust_workspace_dir                 = var.locust_workspace_dir
     helix_core_port                      = var.helix_core_port
-
+    avoid_ssh_connection                 = var.driver_avoid_ssh_connection
   }))
 
   create_files_template = templatefile("${path.module}/../scripts/create_files.sh", {
