@@ -1,4 +1,6 @@
 #!/bin/bash
+# Default usage:
+#   ./analyse.sh
 
 function bail () { echo "\nError: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 
@@ -19,10 +21,13 @@ rundir=$P4BENCH_HOME/run/$runid
 echo "Creating $rundir"
 
 # copy logs - server logs for analysis and clients just in case
+avoid_ssh_executions=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.avoid_ssh_connection')
+echo "Avoid ssh executions: ${avoid_ssh_executions}"
+
 echo "Copying logs..."
-ansible-playbook -i $ANSIBLE_HOSTS ansible/copy_server_logs.yml > /dev/null
+[[ $avoid_ssh_executions != "true" ]] && ansible-playbook -i $ANSIBLE_HOSTS ansible/copy_server_logs.yml > /dev/null
 ansible-playbook -i $ANSIBLE_HOSTS ansible/copy_client_logs.yml > /dev/null
-ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
+[[ $avoid_ssh_executions != "true" ]] && ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
 
 mkdir $rundir
 pushd $rundir

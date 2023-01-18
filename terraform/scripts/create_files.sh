@@ -17,7 +17,7 @@ catch() {
 
 export P4CLIENT=$CREATE_FILES_DIRECTORY
 export P4USER=${helix_core_commit_benchmark_username}
-export P4PORT="ssl:${helix_core_private_ip}:1666"
+export P4PORT="ssl:${helix_core_private_ip}:${helix_core_port}"
 export P4TRUST=/home/rocky/.p4trust
 export P4TICKETS=/home/rocky/.p4tickets
 
@@ -33,7 +33,9 @@ cd "/tmp/$CREATE_FILES_DIRECTORY"
 p4 --field "View=//depot/... //$CREATE_FILES_DIRECTORY/..." client -o | p4 client -i
 p4 --field "Host=" client -o | p4 client -i
 
-python3 /p4benchmark/locust_files/createfiles.py -l $CREATE_FILES_LEVELS -s $CREATE_FILES_SIZE -m $CREATE_FILES_NUMBER -d . --create
+export CREATE_FILES_ARGUMENTS="-l $CREATE_FILES_LEVELS -s $CREATE_FILES_SIZE -m $CREATE_FILES_NUMBER -d . --create"
+
+python3 /p4benchmark/locust_files/createfiles.py $CREATE_FILES_ARGUMENTS
 
 
 
@@ -53,7 +55,7 @@ python3 /p4benchmark/locust_files/createfiles.py -l $CREATE_FILES_LEVELS -s $CRE
 
 
 p4 rec -a
-p4 submit -d "$P4CLIENT - Adding files created from createfiles.py"
+p4 submit --parallel=threads=5 -d "Adding files created from createfiles.py - workspace: $P4CLIENT - arguments: $CREATE_FILES_ARGUMENTS"
 p4 changes -t
 
 cd /

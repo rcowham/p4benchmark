@@ -36,16 +36,6 @@ variable "ami" {
   }
 }
 
-# not implemented yet
-# variable "helix_core_p4d_configurables" {
-#   description = "Array of p4d configurables to apply at deploy time"
-#   type        = list(string)
-#   default = [
-#     "p4 configure set net.parallel.max=100",
-#     "p4 configure set net.parallel.threads=10"
-#   ]
-# }
-
 variable "associate_public_ip_address" {
   description = "Whether to associate a public IP address with an instance in a VPC"
   type        = bool
@@ -174,8 +164,6 @@ variable "helix_core_commit_instance_type" {
   default     = "c5.xlarge"
 }
 
-
-
 variable "ingress_cidrs_1666" {
   description = "CIDR blocks to whitelist for Helix Core access"
   type        = string
@@ -199,10 +187,6 @@ variable "ingress_cidrs_3000" {
   type        = list(string)
   default     = [""]
 }
-
-
-
-
 
 
 variable "client_vm_count" {
@@ -235,8 +219,6 @@ variable "locust_repeat" {
   default     = "5"
 }
 
-
-
 variable "client_root_volume_size" {
   description = "The size of the root volume for the Locust clients"
   type        = number
@@ -249,10 +231,8 @@ variable "client_root_volume_type" {
   default     = "gp3"
 }
 
-
-
 variable "driver_instance_type" {
-  description = "The type of instance to for driver"
+  description = "The type of instance to for driver.  Typically the driver VM can be very small because it is just an orchestrator.  The one exception is if you want terraform to run createfiles.py.  If you load up createfile_configs with multiple itterations these will all be run from the driver VM in parallel"
   type        = string
   default     = "t3.small"
 }
@@ -269,6 +249,11 @@ variable "driver_root_volume_type" {
   default     = "gp2"
 }
 
+variable "driver_avoid_ssh_connection" {
+  description = "Avoid SSH connections between driver and commit VMs"
+  type        = string
+  default     = "false"
+}
 
 variable "p4benchmark_github_project_owner" {
   description = "GitHub owner of the p4benchmark project"
@@ -288,6 +273,12 @@ variable "p4benchmark_github_branch" {
   default     = "main"
 }
 
+# TOOD: should this variable go away and we just use existing_helix_core_public_ip be set or null???
+variable "apply_p4d_configurables" {
+  description = "Wether or not to apply p4d configurables before create files is executed to improve throughput"
+  type        = bool
+  default     = false
+}
 
 variable "createfile_configs" {
   description = "createfile_configs is an array of maps.  Each object will be passed to createfiles.py.  Use an empty array if you want to skip running createfiles.py from terraform"
@@ -303,8 +294,6 @@ variable "createfile_configs" {
     }
   ]
 }
-
-
 
 variable "helix_core_commit_username" {
   description = "Username to use for administoring Helix Core"
@@ -412,6 +401,12 @@ variable "existing_helix_core_public_ip" {
   description = "Existing helix core public IP for terraform to connect via remote-exec for configuration"
   type        = string
   default     = ""
+}
+
+variable "helix_core_port" {
+  description = "Existing helix core listening port"
+  type        = string
+  default     = "1666"
 }
 
 variable "existing_helix_core_port" {

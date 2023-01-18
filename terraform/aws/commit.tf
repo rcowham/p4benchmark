@@ -4,7 +4,7 @@ locals {
   helix_core_commit_az = var.existing_vpc ? var.existing_az : module.vpc[0].azs[0]
   helix_core_subnet_id = var.existing_vpc ? var.existing_public_subnet : module.vpc[0].public_subnets[0]
 
-  user_data = templatefile("${path.module}/../scripts/helix-core-userdata.sh", {
+  user_data = templatefile("${path.module}/../scripts/helix_core_userdata.sh", {
     environment          = var.environment
     ssh_public_key       = tls_private_key.ssh-key.public_key_openssh
     ssh_private_key      = tls_private_key.ssh-key.private_key_openssh

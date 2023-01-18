@@ -11,7 +11,6 @@
         src: "{{item}}"
         dest: "{{bench_dir}}"
       with_fileglob:
-        - "{{bench_dir}}/config_p4_*.yml"
         - "{{bench_dir}}/locust_files/*.py"
         - "{{bench_dir}}/utils/run_locust_worker.sh"
         - "{{bench_dir}}/bench_p4config.txt"

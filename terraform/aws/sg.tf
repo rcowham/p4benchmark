@@ -30,14 +30,14 @@ module "helix_core_sg" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      description = "Helix Core 1666"
+      description = "SSH from outside the VPC"
       cidr_blocks = var.ingress_cidrs_22
     },
     {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      description = "SSH"
+      description = "SSH from the VPC"
       cidr_blocks = var.vpc_cidr
     }
   ]
@@ -74,14 +74,14 @@ module "locust_sg" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      description = "SSH"
+      description = "SSH from outside the VPC"
       cidr_blocks = var.ingress_cidrs_22
     },
     {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      description = "SSH"
+      description = "SSH from the VPC"
       cidr_blocks = var.vpc_cidr
     }
   ]
@@ -111,7 +111,7 @@ module "driver_sg" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      description = "SSH"
+      description = "SSH from outside the VPC"
       cidr_blocks = var.ingress_cidrs_22
     },
     {
