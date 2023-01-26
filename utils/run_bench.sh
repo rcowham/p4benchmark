@@ -33,8 +33,12 @@ echo "Avoid ssh executions: ${avoid_ssh_executions}"
 export DEFAULT_ROUTE_INTERFACE=$(ip route  | grep default | awk '{print $5}')
 export P4BENCH_HOST=$(ifconfig $DEFAULT_ROUTE_INTERFACE | grep "inet " | awk '{print $2}')
 export P4BENCH_SCRIPT
-# Calculate env vars to be picked up by run_master.sh
 
+p4port=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[0]')
+p4user=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.user')
+p4="p4 -p $p4port -u $p4user "
+
+# Calculate env vars to be picked up by run_master.sh
 export P4BENCH_NUM_WORKERS_PER_HOST=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.num_workers')
 export P4BENCH_CLIENT_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_client_user')
 export P4BENCH_NUM_HOSTS=$(cat $ANSIBLE_HOSTS | yq '.all.children.bench_clients.hosts | length')
@@ -53,6 +57,9 @@ ansible-playbook -i $ANSIBLE_HOSTS ansible/pre_client_bench.yml
 
 # Flush filesystem caches on server
 [[ $avoid_ssh_executions != "true" ]] && ansible-playbook -i $ANSIBLE_HOSTS ansible/flush_server_cache.yml
+
+# Save starting change counter - picked up by analyse.sh
+$p4 counter change > change_counter.txt
 
 # Run the locust master - waiting for clients to connect and then spawn client worker jobs
 $P4BENCH_UTILS/run_locust_master.sh
