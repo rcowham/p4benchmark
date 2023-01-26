@@ -40,6 +40,7 @@ def basicActions(bench, request_type):
 
     t = Timer(request_type)
     name = "actions"
+    count = 0
     try:
         count = bench.basicFileActions()
         t.report_success(name, count)
@@ -52,6 +53,7 @@ def reportingActions(bench, request_type):
 
     t = Timer(request_type)
     name = "reporting"
+    count = 0
     try:
         count = bench.reportingActions()
         t.report_success(name, count)
