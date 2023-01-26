@@ -238,8 +238,12 @@ class P4Benchmark(object):
             action = random.choice(["add", "edit", "edit", "edit", "edit", "delete"])
             filename = random.choice(self.localfilelist)
             if action == "add":
-                addfilename = os.path.join(os.path.dirname(filename), generator(20, eol=""))
-                create_file(random.randint(100, 1000000), addfilename, random.choice([True, False]))
+                isBinary = random.choice([True, False])
+                ext = ".txt"
+                if isBinary:
+                    ext = ".dat"
+                addfilename = os.path.join(os.path.dirname(filename), generator(20, eol="") + ext)
+                create_file(random.randint(100, 1000000), addfilename, isBinary)
                 self.addFile(addfilename)
             elif action == "edit":
                 self.editFile(filename)

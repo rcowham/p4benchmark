@@ -47,6 +47,8 @@ def basicActions(bench, request_type):
     except Exception as e:
         logger.exception(e)
         t.report_failure(name, e, count)
+        with bench.p4.at_exception_level(P4.P4.RAISE_ERRORS):
+            bench.p4.run_revert("//...")
 
 def reportingActions(bench, request_type):
     "Does describe/fstat/filelog"
