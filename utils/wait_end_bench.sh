@@ -21,8 +21,7 @@ p4="p4 -p $p4port -u $p4user "
 
 # All commit and edge servers to poll
 declare -a p4hosts
-
-mapfile -t p4hosts < <(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port | values[]')
+mapfile -t p4hosts < <(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[]')
 
 while true
 do
