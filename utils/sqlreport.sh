@@ -121,21 +121,23 @@ from process where cmd = 'user-sync' or cmd = 'user-transmit';
 EOF
 sqlite3 -header run.db < sql.in
 
-echo "" >> $sqlreport
-echo "Report for instance: $instance" >> $sqlreport
-echo "$rundir" >> $sqlreport
-echo "" >> $sqlreport
-cat $sqlreport
+{
+  echo ""
+  echo "Report for instance: $instance"
+  echo "$rundir"
+  echo ""
 
 grep parallel config.out
 grep workspace_root $ANSIBLE_HOSTS | grep -v "#"
 
-echo ""
-echo "Workspace sizes on commit (for cross check)"
-echo "Client:"
-echo "Files Size"
-cat client_sizes*.txt | awk '{f += $2; s += $4+0} END { printf "%d %.2fG\n", f, s;}'
+  echo ""
+  echo "Workspace sizes on commit (for cross check)"
+  echo "Client:"
+  echo "Files Size"
+  cat client_sizes*.txt | awk '{f += $2; s += $4+0} END { printf "%d %.2fG\n", f, s;}'
 
-cat changes.out
+  cat changes.out
+  echo ""
+} >> $sqlreport
 
-echo ""
+cat $sqlreport
