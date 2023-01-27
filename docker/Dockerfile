@@ -109,7 +109,7 @@ USER root
 RUN dnf install --assumeyes epel-release; \
     dnf install --assumeyes ansible; \
     dnf install --assumeyes cronie; \
-    dnf install --assumeyes sqlite nc
+    dnf install --assumeyes sqlite nc iproute
 
 # Log analyzer required
 RUN mkdir /home/perforce/bin; \
