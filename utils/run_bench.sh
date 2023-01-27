@@ -30,6 +30,15 @@ P4BENCH_SCRIPT=${2:-Unset}
 avoid_ssh_executions=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.avoid_ssh_connection')
 echo "Avoid ssh executions: ${avoid_ssh_executions}"
 
+# Used in post_previous_client_bench.yml - in some circumstances we want to remove them differently
+# e.g. with shared filesystems
+remove_workspaces_per_client=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.remove_workspaces_per_client')
+if [[ -z $remove_workspaces_per_client || $remove_workspaces_per_client = "null" ]]; then
+    export REMOVE_WORKSPACES_PER_CLIENT=true
+else
+    export REMOVE_WORKSPACES_PER_CLIENT=$remove_workspaces_per_client
+fi
+
 export DEFAULT_ROUTE_INTERFACE=$(ip route  | grep default | awk '{print $5}')
 export P4BENCH_HOST=$(ifconfig $DEFAULT_ROUTE_INTERFACE | grep "inet " | awk '{print $2}')
 export P4BENCH_SCRIPT

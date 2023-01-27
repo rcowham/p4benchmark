@@ -1,6 +1,8 @@
 - name: Tidy up after p4benchmark scripts
   hosts: bench_clients
   remote_user: '{{ remote_user }}'
+  vars:
+    remove_workspaces_per_client: "{{ lookup('env', 'REMOVE_WORKSPACES_PER_CLIENT') }}"
   tasks:
 
   - name: Kill locust processes if they exist
@@ -11,4 +13,5 @@
     file:
       path: "{{workspace_common_dir}}"
       state: absent
+    when: remove_workspaces_per_client is defined and remove_workspaces_per_client == "true"
 
