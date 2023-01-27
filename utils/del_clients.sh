@@ -5,8 +5,6 @@ function bail () { echo "Error: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 [[ -z $ANSIBLE_HOSTS ]] && bail "Environment variable ANSIBLE_HOSTS not set"
 [[ -e $ANSIBLE_HOSTS ]] || bail "ANSIBLE_HOSTS file not found: $ANSIBLE_HOSTS"
 
-[[ -z $p4port ]] && bail "Can't get data out of hosts: $ANSIBLE_HOSTS"
-
 export P4BENCH_CLIENT_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_client_user')
 
 # All commit and edge servers to poll
@@ -23,5 +21,5 @@ function del_clients() {
 
 for h in "${p4hosts[@]}"
 do
-    del_clients $p4port
+    del_clients $h
 done
