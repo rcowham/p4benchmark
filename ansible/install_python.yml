@@ -38,11 +38,12 @@
         mode: 0755
         state: link
 
-    # - file:
-    #     src: /usr/bin/pip3.
-    #     dest: /usr/bin/pip3
-    #     mode: 0755
-    #     state: link
+      # Make sure pip3 picks up correct version of python in case of others installed.
+    - file:
+        src: /usr/bin/pip3.8
+        dest: /usr/bin/pip3
+        mode: 0755
+        state: link
 
     - name: Pip install packages for Locust and benchmark tools
       command: pip3 install pyaml numpy pyzmq locust mimesis yq
