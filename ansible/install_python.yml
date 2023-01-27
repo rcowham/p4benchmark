@@ -45,5 +45,5 @@
     #     state: link
 
     - name: Pip install packages for Locust and benchmark tools
-      command: pip3 install pyaml numpy pyzmq locust mimesis
+      command: pip3 install pyaml numpy pyzmq locust mimesis yq
 
