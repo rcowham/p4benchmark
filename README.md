@@ -289,7 +289,7 @@ all:
 
 Ensure Perforce server running:
 
-    utils/run_bench.sh 1 basic
+    utils/run_bench.sh basic
 
 This will typically take a minute or two to launch the benchmark.
 
@@ -313,7 +313,7 @@ There is a convenience script: `utils/wait_end_bench.sh` - you can edit this scr
 Then the following command will run everything:
 
 ``` bash
-nohup utils\run_bench.sh 1 basic && sleep 30 && utils/wait_end_bench.sh && sleep 30 && utils/analyse.sh &
+nohup utils\run_bench.sh basic && sleep 30 && utils/wait_end_bench.sh && sleep 30 && utils/analyse.sh &
 ```
 
 ## Examples of running the tool
