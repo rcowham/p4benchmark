@@ -5,12 +5,12 @@
 # Compilers and related tools:
 yum install yum-utils
 
-# yum groupinstall -y "development tools"
+yum groupinstall -y "development tools"
 
 cd /tmp
-dnf install --assumeyes python38 python3-pip
+dnf install --assumeyes python38 python38-devel python3-pip
 
 # Now install python modules
-pip3 install pyaml numpy pyzmq locust mimesis
+pip3 install pyaml numpy pyzmq locust mimesis yq
 
 

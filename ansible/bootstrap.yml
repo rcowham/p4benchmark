@@ -4,14 +4,14 @@
 
 - hosts: '{{ hosts }}'
   remote_user: '{{ user }}'
-  sudo: yes
+  become: yes
 
   tasks:
     - name: Create Perforce User account
       user: 
         name: perforce
         shell: /bin/bash
-        home: /p4
+        home: /home/perforce
       become: yes
 
     - name: Allow perforce user to have passwordless sudo
@@ -25,7 +25,7 @@
 
     - name: Make sure .ssh exists
       file:
-        path: /p4/.ssh
+        path: /home/perforce/.ssh
         state: directory
         mode: 0700
       become: true
@@ -35,7 +35,7 @@
     - name: Copy ssh private key
       copy:
         src: private/id_rsa
-        dest: /p4/.ssh/
+        dest: /home/perforce/.ssh/
         mode: 0600
       become: true
       become_user: perforce
@@ -50,12 +50,20 @@
 
     - name: Create a directory for perforce workspaces on /home
       file:
-        path: /home/p4
+        path: /home/perforce/work
         state: directory
         owner: perforce
       become: true
 
-    # - name: Create a directory for perforce workspaces on /p4ws
+    - name: Add or modify nofile soft limit for the user
+      pam_limits:
+        domain: perforce
+        limit_type: soft
+        limit_item: nofile
+        value: 64000
+      become: true
+
+    # - name: Create a directory for perforce workspaces on /home/perforcews
     #   file:
     #     path: /p4ws/p4
     #     state: directory
