@@ -14,6 +14,10 @@ export P4BENCH_CLIENT_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_clien
 export P4BENCH_SETUP_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_setup_user')
 p4port=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[0]')
 
+# All commit and edge servers to poll
+declare -a p4hosts
+mapfile -t p4hosts < <(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[]')
+
 function obliterate_changes() {
     P4PORT=${1}
     last_change=$(p4 -p "$P4PORT" -u "${P4BENCH_CLIENT_USER}" changes | grep "@${P4BENCH_CLIENT_USER}" | tail -1 | cut -d' ' -f 2)
@@ -51,4 +55,7 @@ function delete_changes() {
 }
 
 obliterate_changes $p4port
-delete_changes $p4port
+for h in "${p4hosts[@]}"
+do
+    delete_changes $h
+done
