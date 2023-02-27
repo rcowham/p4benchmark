@@ -101,11 +101,12 @@ group by svr;
 PRAGMA temp_store = 2;      -- store temp table in memory, not on disk
 CREATE TEMP TABLE _Variables(Start DATE, SubmitStart DATE, SubmitEnd DATE);
 
+/* Convert to ISO date format if necessary */
 .print "\n"
 insert into _variables
-values((select min(starttime) from process where cmd = "user-sync" or cmd = "user-transmit"),
-    (select min(starttime) from process where cmd = "user-submit"),
-    (select max(endtime) from process where cmd = "user-submit"));
+values((select replace(min(starttime),'/','-') from process where cmd = "user-sync" or cmd = "user-transmit"),
+    (select replace(min(starttime),'/','-') from process where cmd = "user-submit"),
+    (select replace(max(endtime),'/','-') from process where cmd = "user-submit"));
 
 select CAST ((julianday(SubmitStart) - julianday(start)) * 24 * 60 * 60 as INTEGER) as Phase1Duration,
     CAST ((julianday(SubmitEnd) - julianday(SubmitStart)) * 24 * 60 * 60 as INTEGER) as Phase2Duration
@@ -127,8 +128,8 @@ sqlite3 -header run.db < sql.in
   echo "$rundir"
   echo ""
 
-grep parallel config.out
-grep workspace_root $ANSIBLE_HOSTS | grep -v "#"
+  grep parallel config.out
+  grep workspace_root $ANSIBLE_HOSTS | grep -v "#"
 
   echo ""
   echo "Workspace sizes on commit (for cross check)"
