@@ -45,7 +45,7 @@ instance=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.sdp_instance')
 declare -a p4hosts
 mapfile -t p4hosts < <(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[]')
 
-[[ -e $P4BENCH_HOME/change_counter.out ]] && mv $P4BENCH_HOME/change_counter.out .
+[[ -e $P4BENCH_HOME/change_counter.txt ]] && mv $P4BENCH_HOME/change_counter.txt .
 cp $P4BENCH_HOME/logs/*worker* .
 gzip *worker*.out &
 
@@ -67,7 +67,7 @@ $p4 configure show > config.out
 grep numActions $P4BENCH_HOME/locust_files/p4benchutils.py >> config.out
 
 # record number of submitted changes
-start_chg=$(cat change_counter.out)
+start_chg=$(cat change_counter.txt)
 end_chg=$($p4 changes -ssubmitted -m1 | cut -d" " -f2)
 chgs=$($p4 changes "@>$start_chg" | wc -l)
 echo "Submitted change start $start_chg end $end_chg" > changes.out
