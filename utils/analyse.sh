@@ -1,6 +1,6 @@
 #!/bin/bash
-# Default usage:
-#   ./analyse.sh
+# Default usage - run from P4BENCH_HOME dir:
+#   utils/analyse.sh
 
 function bail () { echo "\nError: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 
@@ -46,11 +46,12 @@ declare -a p4hosts
 mapfile -t p4hosts < <(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[]')
 
 [[ -e $P4BENCH_HOME/change_counter.txt ]] && mv $P4BENCH_HOME/change_counter.txt .
-cp $P4BENCH_HOME/logs/*worker* .
-gzip *worker*.out &
+mkdir -p workers
+mv $P4BENCH_HOME/logs/*worker* workers/
+gzip workers/*worker*.out &
 
 # Master/edge logs
-cp $P4BENCH_HOME/logs/*-log .
+mv $P4BENCH_HOME/logs/*.log .
 
 # Record sizes of clients
 for h in "${p4hosts[@]}"
@@ -74,6 +75,6 @@ echo "Submitted change start $start_chg end $end_chg" > changes.out
 echo "Count: $chgs" >> changes.out
 
 # Analyse logs into sql db - uses log2sql from https://github.com/rcowham/go-libp4dlog/releases
-~/bin/log2sql -d run *-log
+~/bin/log2sql -d run *.log -m run.metrics -s "run_$i"
 
 $P4BENCH_UTILS/sqlreport.sh $rundir

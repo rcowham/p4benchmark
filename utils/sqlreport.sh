@@ -114,7 +114,7 @@ from _variables;
 
 .print "\n"
 
-select CAST ((julianday(max(endtime)) - julianday(min(starttime))) * 24 * 60 * 60 as INTEGER) as TotalSecondsDuration 
+select CAST ((julianday(replace(max(endtime),'/','-')) - julianday(replace(min(starttime),'/','-'))) * 24 * 60 * 60 as INTEGER) as TotalSecondsDuration 
 from process where cmd = 'user-sync' or cmd = 'user-transmit';
 
 .print "\n"

@@ -12,6 +12,6 @@
     - name: Copy log files
       fetch:
         src: "{{item.path}}"
-        dest: "{{bench_dir}}/logs/{{inventory_hostname}}-{{item.path | basename}}"
+        dest: "{{bench_dir}}/logs/{{inventory_hostname}}.{{item.path | basename}}"
         flat: yes
       with_items: "{{files_to_copy.files}}"
