@@ -1,5 +1,5 @@
 #!/bin/bash
-# Obliterates all changes by user bruno - make sure you have submitted changes
+# Obliterates all changes by user P4BENCH_CLIENT_USER - make sure you have submitted changes
 # you want to keep under different user id, e.g. perforce!!
 
 function bail () { echo "Error: ${1:-Unknown Error}\n"; exit ${2:-1}; }
