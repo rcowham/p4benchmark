@@ -1,7 +1,7 @@
 pyaml
 numpy
 pyzmq
-locust
+locust==2.14.2
 mimesis
 
 # Note that p4python should be installed via apt/yum and the perforce-p4python3 package

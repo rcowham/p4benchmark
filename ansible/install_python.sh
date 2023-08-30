@@ -11,6 +11,6 @@ cd /tmp
 dnf install --assumeyes python38 python38-devel python3-pip
 
 # Now install python modules
-pip3 install pyaml numpy pyzmq locust mimesis yq
+pip3 install pyaml numpy pyzmq locust==2.14.2 mimesis yq
 
 
