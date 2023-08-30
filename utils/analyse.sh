@@ -36,6 +36,7 @@ cp "$P4BENCH_HOME/$ANSIBLE_HOSTS" .
 
 p4port=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[0]')
 p4user=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_setup_user')
+export P4BENCH_CLIENT_USER=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_client_user')
 p4="p4 -p $p4port -u $p4user "
 
 instance=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.sdp_instance')
@@ -58,7 +59,7 @@ mv $P4BENCH_HOME/logs/*.log .
 for h in "${p4hosts[@]}"
 do
   ep4="p4 -p $h -u $p4user"
-  $ep4 clients -e bruno* |cut -d " " -f 2| while read c
+  $ep4 clients -e "${P4BENCH_CLIENT_USER}*" |cut -d " " -f 2| while read c
   do
     $ep4 -c $c sizes -sh //$c/... >> client_sizes.txt
   done
