@@ -17,6 +17,7 @@ rundir=$P4BENCH_HOME/run/$runid
 
 [[ -z $ANSIBLE_HOSTS ]] && bail "Environment variable ANSIBLE_HOSTS not set"
 [[ -e $ANSIBLE_HOSTS ]] || bail "ANSIBLE_HOSTS file not found: $ANSIBLE_HOSTS"
+command -v log2sql >/dev/null 2>&1 || bail "Please install log2sql in PATH (from https://github.com/rcowham/go-libp4dlog/releases)"
 
 echo "Creating $rundir"
 
@@ -34,7 +35,7 @@ pushd $rundir
 cp "$P4BENCH_HOME/$ANSIBLE_HOSTS" .
 
 p4port=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[0]')
-p4user=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.user')
+p4user=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.p4bench_setup_user')
 p4="p4 -p $p4port -u $p4user "
 
 instance=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.sdp_instance')
@@ -75,6 +76,6 @@ echo "Submitted change start $start_chg end $end_chg" > changes.out
 echo "Count: $chgs" >> changes.out
 
 # Analyse logs into sql db - uses log2sql from https://github.com/rcowham/go-libp4dlog/releases
-~/bin/log2sql -d run *.log -m run.metrics -s "run_$i"
+log2sql -d run *.log -m run.metrics -s "run_$i"
 
 $P4BENCH_UTILS/sqlreport.sh $rundir

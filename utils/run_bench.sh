@@ -21,10 +21,8 @@ cd $P4BENCH_HOME
 [[ -e $ANSIBLE_HOSTS ]] || bail "ANSIBLE_HOSTS file not found: $ANSIBLE_HOSTS"
 
 # Check for dependencies
-yq=$(which yq)
-[[ $? -eq 0 ]] || bail "Failed to find yq command in PATH - please install via yum/apt"
-ip=$(which ip)
-[[ $? -eq 0 ]] || bail "Failed to find ip command in PATH - please install via yum/apt"
+command -v yq >/dev/null 2>&1 || bail "Please install yq command (via yum/apt)"
+command -v ip >/dev/null 2>&1 || bail "Please install ip command (via yum/apt)"
 
 P4BENCH_SCRIPT=${1:-Unset}
 [[ $P4BENCH_SCRIPT == "Unset" ]] && bail "Specify P4BENCH_SCRIPT as parameter"
@@ -79,6 +77,7 @@ $p4 counter change > change_counter.txt
 $P4BENCH_UTILS/run_locust_master.sh
 ansible-playbook -i $ANSIBLE_HOSTS ansible/client_bench.yml
 
-# echo "Running monitor jobs in background"
-# $P4BENCH_UTILS/run_monitor.sh &
+echo ""
+echo "Run utils/wait_end_bench.sh to wait for client worker jobs to finish"
+echo "Then run utils/analyse.sh to analyse the results"
 echo ""
