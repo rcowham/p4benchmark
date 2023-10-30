@@ -15,10 +15,11 @@ all:
     p4bench_client_user: bruno
     # The p4user account used for setting up repository - must be different to the _client_user
     p4bench_setup_user: perforce
+    # Used in post_previous_client_bench.yml - in some circumstances we want to remove them differently
+    # e.g. with shared filesystems between clients we would set this to false
+    remove_workspaces_per_client: true
     # The perforce SDP instance
     sdp_instance: 1
-    # The port to use
-    p4port: 1666
     # Number of workers per bench_client
     num_workers: 12
 
@@ -32,11 +33,17 @@ all:
     # Specify password if required
     perforce:
         # Array of ports - can include ssl prefix. Allows for random selection of commit/edge servers
+        # The first entry is considered to be commit server.
         port:
         - master:1666
+        # use_commit: if true (or not present) then commit server will be used. 
+        # If set to false then only other entries in above array (edge servers) will be used.
+        use_commit: true
+        # user: P4USER value
         user:       bruno
+        # charset: P4CHARSET value if server is in unicode mode - can be blank
         charset:
-        # password:   "my!Password"
+        # password:   Set to password (if required) = usually best to put in quotes: "my!Password"
         password:   
         options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
         sync_progress_size_interval: 100 * 1000 * 1000
