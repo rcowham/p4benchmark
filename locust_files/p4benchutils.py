@@ -114,7 +114,10 @@ class P4Benchmark(object):
         if isinstance(p4config["port"], str_types):
             self.p4.port = p4config["port"]
         elif isinstance(p4config["port"], list):
-            self.p4.port = random.choice(p4config["port"])
+            ind = 0
+            if "use_commit" in p4config and not p4config["use_commit"]:
+                ind = 1
+            self.p4.port = random.choice(p4config["port"][ind:])
         else:
             raise Exception("Unknown port config")
         logger.info("Connecting to server: %s" % self.p4.port)
