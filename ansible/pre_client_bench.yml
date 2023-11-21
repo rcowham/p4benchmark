@@ -20,5 +20,5 @@
       file:
         path: "{{workspace_common_dir}}"
         state: directory
-        owner: perforce
-      become: true
+        owner: "{{remote_user}}"
+        group: "{{remote_user}}"
