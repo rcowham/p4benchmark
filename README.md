@@ -241,15 +241,29 @@ There are currently 2 benchmarks:
 
 ## Configuration
 
-Edit the file `hosts.yaml` and according the comments in it to specify your local P4D and
+Copy the file `hosts.docker.yaml` to your own file (say `hosts.yaml`) and according to the comments in it to specify your local P4D and
 repository paths to use.
 
 ``` yaml
 all:
   vars:
-    # Other vars
-    # :
-
+    # OS User account to execute commands
+    remote_user: perforce
+    # The directory to which benchmark scripts are copied on client machines, and where run from
+    bench_dir: /p4/benchmark
+    # The common directory on client machines in which workspaces are run
+    workspace_common_dir: /p4/work
+    # The p4user account used for running client programs (and which owns client workspaces/changelists etc)
+    p4bench_client_user: bruno
+    # The p4user account used for setting up repository - MUST BE DIFFERENT TO THE _CLIENT_USER
+    p4bench_setup_user: perforce
+    # Used in post_previous_client_bench.yml - in some circumstances we want to remove them differently
+    # e.g. with shared filesystems between clients we would set this to false
+    remove_workspaces_per_client: true
+    # The perforce SDP instance - if blank then assumed to be testing non-SDP installation
+    sdp_instance: 1
+    # Number of workers per bench_client
+    num_workers: 12
     # Script vars:
     general:
         min_wait: 1000
@@ -260,11 +274,19 @@ all:
     # Specify password if required
     # port is an array to allow for multiple possible servers to be specified if required
     perforce:
+        # Array of ports - can include ssl prefix. Allows for random selection of commit/edge servers
+        # The first entry is considered to be commit server.
         port:       
-        - 10.21.152.35:1666
-        - 10.21.152.36:1666
+        - master:1666
+        - edge01:1666
+        # use_commit: if true (or not present) then commit server will be used.
+        # If set to false then only other entries in above array (edge servers) will be used.
+        use_commit: true
+        # user: P4USER value
         user:       bruno
+        # charset: P4CHARSET value if server is in unicode mode - can be blank
         charset:
+        # password:   Set to password (if required) = usually best to put in quotes: "my!Password"
         password:
         options:  noallwrite noclobber nocompress unlocked nomodtime rmdir
         # The following only takes effect if sync_args not used.
@@ -287,20 +309,22 @@ all:
 
 ## Running the tool
 
-Ensure Perforce server running:
+Ensure Perforce server running, and then:
 
+    export ANSIBLE_HOSTS=hosts.yaml
     utils/run_bench.sh basic
 
 This will typically take a minute or two to launch the benchmark.
 
-You can observe via `utils/do_monitor.sh` how many concurrent processes are running against the server(s).
+
+If not running `exec_bench.sh`, you can observe via `utils/wait_end_bench.sh` how many concurrent processes are running against the server(s).
 
 When the benchmark has finished:
 
     utils/analyse.sh
 
 This creates a new directory under `./run/` and copies relevant log files from the worker (client) machines, as well as the replicas (if used). 
-At the end it will run the `log2sql` log analysis script to create a Sqlite database, and then run some queries on that database.
+At the end it will run the `log2sql` log analysis script (which must be available in your PATH) to create a Sqlite database, and then run some queries on that database.
 
 It uses `log2sql` from https://github.com/rcowham/go-libp4dlog/releases (see Dockerfile for example of installation)
 
@@ -308,13 +332,20 @@ It also saves various configuration values, so that you can compare
 and contrast the results of different configurations with
 each other.
 
-There is a convenience script: `utils/wait_end_bench.sh` - you can edit this script and check to make sure it is configured with any replicas used.
+### Convenience wrapper script exec_bench.sh
 
-Then the following command will run everything:
+There is a convenience wrapper:
 
-``` bash
-nohup utils\run_bench.sh basic && sleep 30 && utils/wait_end_bench.sh && sleep 30 && utils/analyse.sh &
-```
+    nohup ./exec_bench.sh hosts.yaml > out1 &
+
+That executes `run_bench.sh` then waits and then runs `analyse.sh` below. Note that it can allow variable parameters 
+which are auto-updated in the ANSIBLE_HOSTS file:
+
+    nohup ./exec_bench.sh hosts.yaml -w 10 -s 50 > out1 &
+
+Check the output of:
+
+    ./exec_bench.sh -h
 
 ## Examples of running the tool
 
