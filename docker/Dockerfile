@@ -32,9 +32,9 @@ RUN useradd --home-dir /home/perforce --create-home --uid 1000 perforce; \
     mkdir /p4; \
     chown perforce:perforce /p4
 RUN echo perforce:perforce | /usr/sbin/chpasswd
-RUN cd /usr/local/bin && curl -k -s -O http://ftp.perforce.com/perforce/r22.1/bin.linux26x86_64/p4 && \
+RUN cd /usr/local/bin && curl -k -s -O https://ftp.perforce.com/perforce/r23.1/bin.linux26x86_64/p4 && \
     chmod +x /usr/local/bin/p4
-RUN echo "source /p4/common/bin/p4_vars 1" >> /home/perforce/.bashrc
+RUN echo "[[ -e /p4/common/bin/p4_vars ]] && source /p4/common/bin/p4_vars 1" >> /home/perforce/.bashrc
 
 RUN echo 'perforce ALL=(ALL) NOPASSWD:ALL'> /tmp/perforce; \
     chmod 0440 /tmp/perforce; \
@@ -114,12 +114,14 @@ RUN dnf install --assumeyes epel-release; \
 # Log analyzer required
 RUN mkdir /home/perforce/bin; \
     cd /home/perforce/bin; \
-    wget -q https://github.com/rcowham/go-libp4dlog/releases/download/v0.10.1/log2sql-linux-amd64.gz; \
+    wget -q https://github.com/rcowham/go-libp4dlog/releases/download/v0.12.2/log2sql-linux-amd64.gz; \
     gunzip log2sql-linux-amd64.gz; \
     mv log2sql-linux-amd64 log2sql; \
     chmod +x log2sql
 
 USER perforce
+
+RUN echo "export PATH=/home/perforce/bin:$PATH" >> /home/perforce/.bashrc
 
 RUN mkdir -p /p4/benchmark/locust_files; \
     mkdir -p /p4/benchmark/ansible; \

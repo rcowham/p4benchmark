@@ -2,7 +2,7 @@
 # Docker entry point - intended to be run on the p4 benchmark master machine only
 # Installs a p4d installation
 # Generates some test data
-# Runs the benchmar scripts
+# Runs the benchmark scripts
 
 function bail () { echo -e "\nError: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 
@@ -21,7 +21,7 @@ cd /p4/common/config
 mv "p4_$sdpinstance.vars" "p4_$sdpinstance.vars.old"
 cat "p4_$sdpinstance.vars.old" | sed -e 's/1999/1666/' > "p4_$sdpinstance.vars"
 
-# Start the server - some issues with doing sysctl in docker so we do it old way
+# Start the server - uses docker version of systemd
 sudo systemctl start "p4d_$sdpinstance"
 
 echo "Waiting for master server to be running"

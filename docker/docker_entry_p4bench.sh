@@ -43,16 +43,17 @@ EOF
 
 mkdir run logs
 echo "Starting benchmark (including initialisation)"
-./utils/run_bench.sh 1 basic 
+./utils/run_bench.sh basic 
 echo "Waiting for benchmark to complete"
 sleep 10
 ./utils/wait_end_bench.sh
 echo "Waiting to analyse results"
 sleep 10
+export PATH=/home/perforce/bin:$PATH
 ./utils/analyse.sh
 
 echo "Waiting for 10 minutes (in case you want to have a look at the machine config etc)"
 echo "If so, run:"
 echo "    docker exec -ti p4benchmark_master_1 /bin/bash"
 echo "Otherwise Ctrl+C to finish"
-sleep 600
+sleep 6000
