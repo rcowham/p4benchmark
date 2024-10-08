@@ -4,6 +4,7 @@
 home_dir=/home/perforce
 mkdir /$home_dir/.ssh
 
+cp /tmp/insecure_ssh_key.pub /$home_dir/.ssh/id_rsa.pub
 mv /tmp/insecure_ssh_key.pub /$home_dir/.ssh/authorized_keys
 mv /tmp/insecure_ssh_key /$home_dir/.ssh/id_rsa
 

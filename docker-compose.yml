@@ -8,7 +8,7 @@ services:
       dockerfile: docker/Dockerfile
       target: p4benchdriver
     hostname: p4bench
-    command: /usr/sbin/sshd -D
+    command: /usr/sbin/init
     privileged: true
     entrypoint: /p4/benchmark/docker_entry_p4bench.sh
     tty: true
@@ -21,7 +21,10 @@ services:
       dockerfile: docker/Dockerfile
       target: p4benchmaster
     hostname: master
-    command: /usr/sbin/sshd -D
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    command: /usr/sbin/init
+    # command: bash -c "/usr/sbin/init && /usr/sbin/sshd -D"
     privileged: true
     # entrypoint: /usr/sbin/sshd && /p4/benchmark/docker_entry_master.sh
     tty: true
@@ -36,7 +39,8 @@ services:
       dockerfile: docker/Dockerfile
       target: p4bench
     hostname: client1
-    command: /usr/sbin/sshd -D
+    command: /usr/sbin/init
+    privileged: true
     networks:
       - nw_p4bench
     tty: true
@@ -49,7 +53,8 @@ services:
       dockerfile: docker/Dockerfile
       target: p4bench
     hostname: client2
-    command: /usr/sbin/sshd -D
+    command: /usr/sbin/init
+    privileged: true
     networks:
       - nw_p4bench
     tty: true

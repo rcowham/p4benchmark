@@ -1,5 +1,25 @@
-FROM rockylinux:8 as p4bench
+FROM rockylinux/rockylinux:9-ubi-init as p4bench
 MAINTAINER Robert Cowham "rcowham@perforce.com"
+
+# For systemd
+
+# ENV container docker
+# # see https://hub.docker.com/_/rockylinux
+# # RockyLinux:9 missing /usr/sbin/init -> ../lib/systemd/systemd
+# #  see https://github.com/rocky-linux/sig-cloud-instance-images/issues/39
+# RUN [ ! -f /usr/sbin/init ] && dnf -y install systemd;
+# RUN ([ -d /lib/systemd/system/sysinit.target.wants ] && cd /lib/systemd/system/sysinit.target.wants/ && for i in *; do [ $i == \
+# systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+# rm -f /lib/systemd/system/multi-user.target.wants/*;\
+# rm -f /etc/systemd/system/*.wants/*;\
+# rm -f /lib/systemd/system/local-fs.target.wants/*; \
+# rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+# rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+# rm -f /lib/systemd/system/basic.target.wants/*;\
+# rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+VOLUME [ "/sys/fs/cgroup" ]
+CMD ["/usr/sbin/init"]
 
 # Common machine configuration (p4bench) - is all that is required for client machines and is
 # basis for master machine.
@@ -9,6 +29,7 @@ RUN yum update -y; \
     yum install -y perl; \
     yum install -y sudo; \
     yum install -y wget; \
+    yum install -y procps; \
     echo /usr/local/lib>> /etc/ld.so.conf; \
     echo /usr/lib64>> /etc/ld.so.conf; \
     sed -ie "s/^Defaults[ \t]*requiretty/#Defaults  requiretty/g" /etc/sudoers
@@ -18,28 +39,23 @@ RUN yum install -y openssh-server openssh-clients passwd; \
     yum clean all; \
     ssh-keygen -A
 
-# Python plus p4python
-RUN dnf install --assumeyes python38 python38-devel python3-pip; \
-    dnf group install --assumeyes "Development Tools"; \
-    rpm --import https://package.perforce.com/perforce.pubkey
-
-RUN yum update; \
-    echo -e "[perforce]\\nname=Perforce\\nbaseurl=https://package.perforce.com/yum/rhel/8/x86_64\\nenabled=1\\ngpgcheck=1\\n" >  /etc/yum.repos.d/perforce.repo; \
-    yum install -y perforce-p4python3-python3.8
-
 # Create perforce user with UID to 1000 before p4d installation
 RUN useradd --home-dir /home/perforce --create-home --uid 1000 perforce; \
     mkdir /p4; \
     chown perforce:perforce /p4
 RUN echo perforce:perforce | /usr/sbin/chpasswd
-RUN cd /usr/local/bin && curl -k -s -O https://ftp.perforce.com/perforce/r23.1/bin.linux26x86_64/p4 && \
-    chmod +x /usr/local/bin/p4
+ADD docker/install_p4.sh /tmp
+RUN /tmp/install_p4.sh
 RUN echo "[[ -e /p4/common/bin/p4_vars ]] && source /p4/common/bin/p4_vars 1" >> /home/perforce/.bashrc
 
 RUN echo 'perforce ALL=(ALL) NOPASSWD:ALL'> /tmp/perforce; \
     chmod 0440 /tmp/perforce; \
     chown root:root /tmp/perforce; \
     mv /tmp/perforce /etc/sudoers.d
+
+# Python plus tools to install requirements for numpy etc.
+RUN dnf install --assumeyes python3-devel python3-pip; \
+    dnf group install --assumeyes "Development Tools"
 
 ADD docker/insecure_ssh_key.pub /tmp
 ADD docker/insecure_ssh_key /tmp
@@ -53,14 +69,13 @@ RUN mkdir -p /p4/benchmark; \
 
 ADD locust_files/requirements.txt /p4/benchmark/
 
-RUN dnf remove --assumeyes python36 python39
-RUN pip3 install -r /p4/benchmark/requirements.txt
-# Useful for parsing YAML in bash
+# jq/yq for yaml in bash
 RUN dnf install --assumeyes jq
-RUN pip3 install yq
+RUN pip3 install yq p4python wheel
+RUN pip3 install -r /p4/benchmark/requirements.txt
 
-# Allow ssh from user perforce
-RUN rm /run/nologin
+# Allow ssh (from users)
+# RUN rm /var/run/nologin
 
 # ==================================================================
 # Dockerfile for master/commit target - builds on the above
@@ -77,17 +92,6 @@ RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     curl -k -s -O https://swarm.workshop.perforce.com/downloads/guest/perforce_software/helix-installer/main/src/reset_sdp.sh; \
     chmod +x reset_sdp.sh; \
     ./reset_sdp.sh -fast -no_ssl -no_sd -no_tweaks
-
-# Replace systemctl for use within docker
-RUN cd /usr/local/bin; \
-    wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl3.py; \
-    chmod 755 systemctl3.py; \
-    cd /usr/local/bin; \
-    mv systemctl systemctl.old; \
-    ln -s /usr/local/bin/systemctl3.py systemctl; \
-    cd /usr/bin; \
-    mv systemctl systemctl.old; \
-    ln -s /usr/local/bin/systemctl3.py systemctl
 
 USER perforce
 
@@ -112,12 +116,8 @@ RUN dnf install --assumeyes epel-release; \
     dnf install --assumeyes sqlite nc iproute
 
 # Log analyzer required
-RUN mkdir /home/perforce/bin; \
-    cd /home/perforce/bin; \
-    wget -q https://github.com/rcowham/go-libp4dlog/releases/download/v0.12.2/log2sql-linux-amd64.gz; \
-    gunzip log2sql-linux-amd64.gz; \
-    mv log2sql-linux-amd64 log2sql; \
-    chmod +x log2sql
+ADD docker/install_log2sql.sh /tmp/
+RUN /tmp/install_log2sql.sh
 
 USER perforce
 
