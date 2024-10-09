@@ -2,7 +2,7 @@
 #
 # Perforce benchmarks using Locust.io framework
 #
-# Copyright (C) 2016, Robert Cowham, Perforce
+# Copyright (C) 2016-2024, Robert Cowham, Perforce
 #
 
 from __future__ import print_function
@@ -10,12 +10,10 @@ from __future__ import print_function
 import os
 import sys
 import logging
-from locust import User, events, task, TaskSet
+from locust import User, task, TaskSet
 from locust.exception import StopUser
 
-import P4
-
-from p4benchutils import popen, fmtsize, readConfig, Timer, P4Benchmark
+from p4benchutils import readConfig, Timer, P4Benchmark
 
 from locust.stats import RequestStats
 def noop(*arg, **kwargs):

@@ -130,6 +130,8 @@ class P4Benchmark(object):
         if "sync_progress_size_interval" in p4config:
             self.sync_progress_size_interval = int(eval(p4config["sync_progress_size_interval"]))
         self.p4.connect()
+        if "ssl:" in self.p4.port:
+            self.p4.run_trust("-y")
         if p4config["password"]:
             self.p4.password = p4config["password"]
             self.p4.run_login()

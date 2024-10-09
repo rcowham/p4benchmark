@@ -89,7 +89,7 @@ echo "Running with $ANSIBLE_HOSTS, P4PORT $P4PORT, workspaces $count_workspaces,
 
 # Remove workspaces from common dir
 function rm_ws() {
-    [[ $remove_workspaces_per_client = "true" ]] && exit
+    [[ $remove_workspaces_per_client = "true" ]] && return
     pushd "$workspace_common_dir" || bail "Failed to pushd to $workspace_common_dir"
     ls | grep "^$p4bench_client_user" > dirs.txt
     count=$(wc -l dirs.txt)
@@ -105,8 +105,10 @@ function set_server() {
     echo $ANSIBLE_HOSTS
 }
 
-# Activate pythen venv
-source bin/activate || bail "Failed to activate virtual env"
+# Activate pythen venv if it exists (can be easier way to install Python packages)
+if [[ -f bin/activate ]]; then
+    source bin/activate || bail "Failed to activate virtual env"
+fi
 
 # Remove old workspaces from shared location
 rm_ws

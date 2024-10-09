@@ -112,5 +112,4 @@ RUN mkdir -p /p4/benchmark/locust_files; \
 ADD locust_files/* /p4/benchmark/locust_files/
 ADD ansible/* /p4/benchmark/ansible/
 ADD utils/* /p4/benchmark/utils/
-ADD hosts.docker.yaml /p4/benchmark/
-ADD docker/docker_entry_p4bench.sh /p4/benchmark/
+COPY hosts.docker.yaml exec_bench.sh docker/docker_entry_p4bench.sh /p4/benchmark/
