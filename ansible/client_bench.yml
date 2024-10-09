@@ -3,7 +3,7 @@
   remote_user: '{{ remote_user }}'
   tasks:
 
-  - include: set_facts.yml
+  - include_tasks: set_facts.yml
 
   - name: Run locust workers
     shell: bash -x run_locust_worker.sh
