@@ -2,6 +2,6 @@ pyaml
 numpy
 pyzmq
 locust==2.14.2
-mimesis==11.1.0
+mimesis==11.1.0 # Last python3.9 compatible version
 
-# Note that p4python should be installed via apt/yum and the perforce-p4python3 package
+# Note that p4python should be installed via pip3 too
