@@ -28,7 +28,13 @@ cat > sql.in <<EOF
 select cmd, count(cmd), 
 round(cast(avg(completedLapse) AS DECIMAL(9, 3)), 3) as "Avg Time", 
 round(cast(max(completedLapse) AS DECIMAL(9, 3)), 3) as "Max Time",
-round(cast(sum(completedLapse) AS DECIMAL(9, 3)), 3) as "Sum Time"
+round(cast(sum(completedLapse) AS DECIMAL(9, 3)), 3) as "Sum Time",
+round(cast(avg(uCPU) AS DECIMAL(9, 3)), 3) as "Avg uCPU (ms)", 
+round(cast(max(uCPU) AS DECIMAL(9, 3)), 3) as "Max uCPU (ms)",
+round(cast(sum(uCPU) AS DECIMAL(9, 3)), 3) as "Sum uCPU (ms)",
+round(cast(avg(sCPU) AS DECIMAL(9, 3)), 3) as "Avg sCPU (ms)", 
+round(cast(max(sCPU) AS DECIMAL(9, 3)), 3) as "Max sCPU (ms)",
+round(cast(sum(sCPU) AS DECIMAL(9, 3)), 3) as "Sum sCPU (ms)"
 from process
 group by cmd;
 
