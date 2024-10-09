@@ -100,8 +100,8 @@ class P4Benchmark(object):
         self.logger = logger
         self.config = config
         self.id = id(self)      # Object id - unique enough for now.
-        if "workspace_root" in config["general"]:
-            self.test_root = config["general"]["workspace_root"]
+        if "workspace_common_dir" in config:
+            self.test_root = config["workspace_common_dir"]
         else:
             self.test_root = os.path.join(startdir, "testdata")
         self.localfilelist = []

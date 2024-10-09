@@ -129,8 +129,6 @@ all:
         general:
             min_wait: 100
             max_wait: 100
-            workspace_root:  ${locust_workspace_dir}
-
 
 
     children:

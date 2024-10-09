@@ -1,22 +1,7 @@
 FROM rockylinux/rockylinux:9-ubi-init as p4bench
 MAINTAINER Robert Cowham "rcowham@perforce.com"
 
-# For systemd
-
-# ENV container docker
-# # see https://hub.docker.com/_/rockylinux
-# # RockyLinux:9 missing /usr/sbin/init -> ../lib/systemd/systemd
-# #  see https://github.com/rocky-linux/sig-cloud-instance-images/issues/39
-# RUN [ ! -f /usr/sbin/init ] && dnf -y install systemd;
-# RUN ([ -d /lib/systemd/system/sysinit.target.wants ] && cd /lib/systemd/system/sysinit.target.wants/ && for i in *; do [ $i == \
-# systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-# rm -f /lib/systemd/system/multi-user.target.wants/*;\
-# rm -f /etc/systemd/system/*.wants/*;\
-# rm -f /lib/systemd/system/local-fs.target.wants/*; \
-# rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-# rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-# rm -f /lib/systemd/system/basic.target.wants/*;\
-# rm -f /lib/systemd/system/anaconda.target.wants/*;
+# ubi-init base containers support systemd
 
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
@@ -73,9 +58,6 @@ ADD locust_files/requirements.txt /p4/benchmark/
 RUN dnf install --assumeyes jq
 RUN pip3 install yq p4python wheel
 RUN pip3 install -r /p4/benchmark/requirements.txt
-
-# Allow ssh (from users)
-# RUN rm /var/run/nologin
 
 # ==================================================================
 # Dockerfile for master/commit target - builds on the above

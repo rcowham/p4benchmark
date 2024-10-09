@@ -215,8 +215,7 @@ class TestP4Benchmark(TestCase):
         p4.run('submit', '-d', 'files')
 
         config = self.loadConfig("""
-            general:
-                workspace_root:  '%s'
+            workspace_common_dir:  '%s'
             perforce:
                 port:       
                 - '%s'

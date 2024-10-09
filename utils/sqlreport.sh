@@ -129,7 +129,7 @@ sqlite3 -header run.db < sql.in
   echo ""
 
   grep parallel config.out
-  grep workspace_root $ANSIBLE_HOSTS | grep -v "#"
+  grep workspace_common_dir $ANSIBLE_HOSTS | grep -v "#"
 
   echo ""
   echo "Workspace sizes on commit (for cross check)"

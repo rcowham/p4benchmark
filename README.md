@@ -63,7 +63,7 @@ master_1   | Report for instance: 1
 master_1   | lrwxrwxrwx 1 root root 20 Apr 16 09:53 /p4/1/root -> /hxmetadata/p4/1/db1
 master_1   | run/1
 master_1   | 
-master_1   |     workspace_root:  /home/p4/ws
+master_1   |     workspace_common_dir:  /home/p4/ws
 master_1   | 
 master_1   | Workspace sizes on commit (for cross check)
 master_1   | Client: Files Size
@@ -268,7 +268,6 @@ all:
     general:
         min_wait: 1000
         max_wait: 10000
-        workspace_root: /tmp/bench_tests
     
     # Perforce benchmark testing parameters
     # Specify password if required

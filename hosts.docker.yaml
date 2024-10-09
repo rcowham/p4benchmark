@@ -27,7 +27,6 @@ all:
     general:
         min_wait: 100
         max_wait: 100
-        workspace_root:  /p4/work
 
     # Perforce benchmark testing parameters
     # Specify password if required
