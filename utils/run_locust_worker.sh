@@ -18,6 +18,6 @@ export P4BENCH_HOST=${P4BENCH_HOST:-Undefined}
    bail "Benchmark host not defined."
 
 for i in $(seq 1 $P4BENCH_NUM_WORKERS); do
-    nohup locust -f p4_${P4BENCH_SCRIPT} --worker --master-host=${P4BENCH_HOST} > worker$i.out 2>&1 &
+    nohup locust -f p4_${P4BENCH_SCRIPT}.py --worker --master-host=${P4BENCH_HOST} > worker$i.out 2>&1 &
 done
 
