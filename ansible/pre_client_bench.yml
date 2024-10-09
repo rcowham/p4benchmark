@@ -4,12 +4,12 @@
   tasks:
 
     - name: Ensures directory exists
-      file: path={{bench_dir}} state=directory
+      file: path={{client_bench_dir}} state=directory
 
     - name: Copy relevant files to client machines
       copy:
         src: "{{item}}"
-        dest: "{{bench_dir}}"
+        dest: "{{client_bench_dir}}"
       with_fileglob:
         - "{{bench_dir}}/locust_files/*.py"
         - "{{bench_dir}}/utils/run_locust_worker.sh"

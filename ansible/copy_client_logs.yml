@@ -4,7 +4,7 @@
   tasks:
     - name: Find files to copy
       find:
-        paths: "{{bench_dir}}"
+        paths: "{{client_bench_dir}}"
         # Note pattern is as specified in run_worker.sh
         patterns: worker*.out
       register: files_to_copy

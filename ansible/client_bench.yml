@@ -8,7 +8,7 @@
   - name: Run locust workers
     shell: bash -x run_locust_worker.sh
     args:
-      chdir: "{{ bench_dir }}"
+      chdir: "{{ client_bench_dir }}"
     environment:
       P4BENCH_NUM_WORKERS: "{{ num_workers }}"
       P4BENCH_SCRIPT: "{{ p4bench_script }}"

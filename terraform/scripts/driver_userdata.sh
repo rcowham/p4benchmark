@@ -84,8 +84,10 @@ all:
     vars:
         # OS User account to execute commands
         remote_user: ${p4benchmark_os_user}
-        # The directory to which benchmark scripts are copied on client machines, and where run from
+        # The source directory on bnechmark driver machine - may be the same as client_bench_dir
         bench_dir: ${p4benchmark_dir}
+        # The directory to which benchmark scripts are copied on client machines, and where run from
+        client_bench_dir: ${p4benchmark_dir}
         # The common directory on client machines in which workspaces are run
         workspace_common_dir: ${locust_workspace_dir}
         # The p4user account used for running client programs (and which owns client workspaces/changelists etc)

@@ -5,7 +5,7 @@
 
     - name: Find files to delete
       find:
-        paths: "{{bench_dir}}"
+        paths: "{{client_bench_dir}}"
         # Pattern defined in run_worker.sh
         patterns: worker*.out
       register: files_to_delete
