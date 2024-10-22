@@ -1,11 +1,12 @@
 #!/bin/bash
 # Main script for running a benchmark.
+# This is usually called from ../exec_bench.sh
 # Usage:
 #   Ensure the env variable ANSIBLE_HOSTS is set to name of appropriate YAML file
 #   ./run_bench.sh basic
-#   ./run_bench.sh syncbench
+#   ./run_bench.sh sync
 # Specify the name of the benchmark script:
-#   basic/syncbench - corresponds to 2 files - locust_files/p4_basic.py or p4_syncbench.py
+#   basic/sync - corresponds to 2 files - locust_files/p4_basic.py or p4_sync.py
 
 function bail () { echo -e "Error: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 

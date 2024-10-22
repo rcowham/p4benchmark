@@ -16,8 +16,8 @@ For more info:
 
 # Background
 
-A customised version of Locust which supports Perforce (and some legacy support for SVN) benchmarking with a configurable
-number of users executing basic tasks (e.g. sync/edit/add/delete/submit).
+A customised version of Locust which supports Perforce (there is an older branch with some legacy support for SVN) 
+benchmarking with a configurable number of users executing basic tasks (e.g. sync/edit/add/delete/submit).
 
 It performs random numbers of adds/edits/deletes with files which are randomly text or binary
 (according to some currently hard coded relative distributions).
@@ -47,13 +47,17 @@ There is also a set of Terraform files which can be used to automate the whole p
 There is a Dockerfile and related docker-compose.yml which show how to
 install a benchmark driver server, a single (commit) server, and run the benchmark with 2 client machines.
 
-It is based onRocky Linux 8 container and does full installation and runs the tests.
+It is based onRocky Linux 9 container (with systemd support) and does full installation and runs the tests.
 
     docker-compose build
+    or
+    podman-compose build
 
 Whick will take 5-10 mins to build the containers (there is a basic one and one for the master server). NOTE - requires docker-compose 3.4+ features!
 
     docker-compose up
+    or
+    podman-compose up
 
 This will produce quite a lot of output but should end up with something like:
 
@@ -77,7 +81,7 @@ master_1   | If so, run this from another terminal session:
 master_1   |     docker exec -ti p4benchmark_master_1 /bin/bash
 ```
 
-When done, just Ctrl+C to stop the containers. (Or use `docker ps` and `docker kill`).
+When done, just Ctrl+C to stop the containers. (Or use `podman-compose down`, or `docker ps` and `docker kill`).
 
 Note that the main script to look at is: docker_entry_master.sh
 
@@ -89,19 +93,21 @@ You need to ensure that all client machines have the basic software installed:
 
 - a suitable test account, e.g. perforce, with sudo access on the boxes (may require known_hosts to be setup)
 - ssh access without passwords (also required for Ansible)
-- suitable Python installation (e.g. Python 3.8) and other dependencies of Locust (see docker/Dockerfile)
+- suitable Python installation (e.g. Python 3.8) and other dependencies of Locust (see docker/Dockerfile for gory details)
 
 ## Configuration of server and client machines
 
 The Ansible scripts are primarily in the `./ansible` directory. They can be run manually but are typically
 run by the top level bash scripts.
 
-Edit the Ansible hosts file to reflect the names of your actual machines. 
+Edit the Ansible hosts file to reflect the names of your actual machines.
 
 See the example `hosts.docker.yaml`. It is a YAML format for Ansible, and includes various configuration values
 for the actual locust scripts.
 
 You may have several versions of this file, and set an environment variable `ANSIBLE_HOSTS` to point to the desired one.
+
+The convenience script `exec_bench.sh` takes one of these files as its single parameter!
 
 ## Bootstrapping machines
 
@@ -236,7 +242,7 @@ p4 submit -d "Initial import" "$dir/..."
 
 There are currently 2 benchmarks:
 
-* syncbench - only syncs workspaces
+* sync - only syncs workspaces
 * basic - syncs as well as performs edits/adds/deletes and reporting actions
 
 ## Configuration
@@ -280,7 +286,7 @@ all:
         port:       
         - master:1666
         - edge01:1666
-        # use_commit: if true (or not present) then commit server will be used.
+        # use_commit: if true (or not present) then commit server will be used (as well as any edge servers defined)
         # If set to false then only other entries in above array (edge servers) will be used.
         use_commit: true
         # user: P4USER value
@@ -312,11 +318,16 @@ all:
 
 Ensure Perforce server running, and then:
 
-    export ANSIBLE_HOSTS=hosts.yaml
-    utils/run_bench.sh basic
+```
+./exec_bench.sh hosts.yaml
+
+# or
+
+export ANSIBLE_HOSTS=hosts.yaml
+utils/run_bench.sh basic
+```
 
 This will typically take a minute or two to launch the benchmark.
-
 
 If not running `exec_bench.sh`, you can observe via `utils/wait_end_bench.sh` how many concurrent processes are running against the server(s).
 
@@ -358,7 +369,6 @@ Running in no-web mode:
 Running in web mode (defaults to http://localhost:8089):
 
     locust -f p4_locust.py
-    locust -f svn_locust.py
 
 ### Web output
 
@@ -381,7 +391,7 @@ on different machines, each communicating results to the master for reporting.
 
 Tested on Windows (with 32 bit python) and Linux/Mac.
 
-* Python 3.8+
+* Python 3.9+
 
 The following packages should be installed via pip:
 

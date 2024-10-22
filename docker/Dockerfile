@@ -52,12 +52,13 @@ EXPOSE 22
 RUN mkdir -p /p4/benchmark; \
     chown -R perforce:perforce /p4/benchmark
 
-ADD locust_files/requirements.txt /p4/benchmark/
-
 # jq/yq for yaml in bash
 RUN dnf install --assumeyes jq
-RUN pip3 install yq p4python wheel
+
+ADD locust_files/requirements.txt /p4/benchmark/
 RUN pip3 install -r /p4/benchmark/requirements.txt
+
+RUN dnf clean all
 
 # ==================================================================
 # Dockerfile for master/commit target - builds on the above
@@ -65,7 +66,8 @@ FROM p4bench as p4benchmaster
 
 USER root
 
-RUN dnf install --assumeyes cronie nc
+RUN dnf install --assumeyes cronie nc; \
+    dnf clean all
 
 RUN mkdir /hxdepots /hxmetadata /hxlogs; \
     chown -R perforce:perforce /hx*; \
@@ -95,7 +97,9 @@ USER root
 RUN dnf install --assumeyes epel-release; \
     dnf install --assumeyes ansible; \
     dnf install --assumeyes cronie; \
-    dnf install --assumeyes sqlite nc iproute
+    dnf install --assumeyes sqlite nc iproute; \
+    dnf clean all
+
 
 # Log analyzer required
 ADD docker/install_log2sql.sh /tmp/

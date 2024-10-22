@@ -22,7 +22,7 @@ RequestStats.reset_all = noop
 
 python3 = sys.version_info[0] >= 3
 
-logger = logging.getLogger("p4_syncbench")
+logger = logging.getLogger("p4_sync")
 
 startdir = os.getcwd()
 
