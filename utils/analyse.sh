@@ -4,6 +4,11 @@
 
 function bail () { echo "\nError: ${1:-Unknown Error}\n"; exit ${2:-1}; }
 
+declare description=""
+
+# Single parameter is a description to save
+description=${1:-Not set}
+
 # Get common root dir
 script_dir="${0%/*}"
 parent_dir="$(cd "$script_dir/.."; pwd -P)"
@@ -12,7 +17,7 @@ P4BENCH_UTILS="$P4BENCH_HOME/utils"
 
 mkdir -p $P4BENCH_HOME/run
 last_run=$(ls $P4BENCH_HOME/run/ | sort -n | tail -1)
-runid=$((last_run+1))  
+runid=$((last_run+1))
 rundir=$P4BENCH_HOME/run/$runid
 
 [[ -z $ANSIBLE_HOSTS ]] && bail "Environment variable ANSIBLE_HOSTS not set"
@@ -20,6 +25,7 @@ rundir=$P4BENCH_HOME/run/$runid
 command -v log2sql >/dev/null 2>&1 || bail "Please install log2sql in PATH (from https://github.com/rcowham/go-libp4dlog/releases)"
 
 echo "Creating $rundir"
+mkdir -p $rundir
 
 # copy logs - server logs for analysis and clients just in case
 avoid_ssh_executions=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.avoid_ssh_connection')
@@ -30,8 +36,11 @@ echo "Copying logs..."
 ansible-playbook -i $ANSIBLE_HOSTS ansible/copy_client_logs.yml > /dev/null
 [[ $avoid_ssh_executions != "true" ]] && ansible-playbook -i $ANSIBLE_HOSTS ansible/rm_server_logs.yml > /dev/null
 
-mkdir $rundir
 pushd $rundir
+
+# Save description
+echo "$description" > description.txt
+
 cp "$P4BENCH_HOME/$ANSIBLE_HOSTS" .
 
 p4port=$(cat $ANSIBLE_HOSTS | yq -r '.all.vars.perforce.port[0]')
@@ -77,6 +86,6 @@ echo "Submitted change start $start_chg end $end_chg" > changes.out
 echo "Count: $chgs" >> changes.out
 
 # Analyse logs into sql db - uses log2sql from https://github.com/rcowham/go-libp4dlog/releases
-log2sql -d run *.log -m run.metrics -s "run_$i"
+log2sql -d run *.log -m run.metrics -s "run_$runid"
 
 $P4BENCH_UTILS/sqlreport.sh $rundir
