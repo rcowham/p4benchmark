@@ -1,3 +1,7 @@
+# Python requirements for p4benchmark to install via pip3
+# Often easiest to install (either globally or user specific): 
+#   pip3 install -r requirements.txt
+#   pip3 install --user -r requirements.txt
 wheel           # For better installations
 pyaml
 numpy

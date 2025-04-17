@@ -24,8 +24,7 @@ It performs random numbers of adds/edits/deletes with files which are randomly t
 
 Basic measure in the output is time for parallel syncs of data, and the number of submits/commits per second/minute. Easily extended for more involved benchmarking tasks.
 
-Uses Ansible for working with multiple client machines. Recommend you consider using the mitogen plugin for improved
-speed.
+Uses Ansible for working with multiple client machines.
 
 ## Benchmark Goals
 
@@ -40,14 +39,14 @@ and instance 2 with the other configuration you want to test.
 
 See the Docker Compose and Dockerfiles for an example of how the SDP is setup.
 
-There is also a set of Terraform files which can be used to automate the whole process in AWS (Azure to come!)
+There is also a set of Terraform files which can be used to automate the whole process in AWS (Azure to come!) **Note these are not necessarily up-to-date**
 
 # Simple Setup - Docker Compose
 
 There is a Dockerfile and related docker-compose.yml which show how to
 install a benchmark driver server, a single (commit) server, and run the benchmark with 2 client machines.
 
-It is based onRocky Linux 9 container (with systemd support) and does full installation and runs the tests.
+It is based on Rocky Linux 9 container (with systemd support) and does full installation and runs the tests.
 
     docker-compose build
     or
@@ -87,15 +86,32 @@ Note that the main script to look at is: docker_entry_master.sh
 
 # Details for manual configuration
 
+## Topology
+
+Typical topology for benchmarking includes:
+
+* One or more server machine(s) on which p4d is installed
+  * It is possible to include edge server(s) in more complex examples
+* A Benchmark driver machine - on which master scripts are installed
+  * Typically you will include Grafana/Prometheus etc - see github.com/perforce/p4prometheus for easy install
+* As many client machines as you need for the scale you need
+
+With appropriate Grafana/prometheus etc configured you can collect metrics during benchmark runs which are useful for compairson between
+runs and different scenarios.
+
 ## Pre-requisites
 
 You need to ensure that all client machines have the basic software installed:
 
 - a suitable test account, e.g. perforce, with sudo access on the boxes (may require known_hosts to be setup)
 - ssh access without passwords (also required for Ansible)
-- suitable Python installation (e.g. Python 3.8) and other dependencies of Locust (see docker/Dockerfile for gory details)
+- suitable Python installation (e.g. Python 3.9) and other dependencies of Locust (see docker/Dockerfile for gory details)
+- Check python requirements: [pip3 install -r requirements](locust_files/requirements.txt)
+- Recommend installing p4prometheus for these machines.
 
 ## Configuration of server and client machines
+
+Recommend installing p4prometheus for this machine.
 
 The Ansible scripts are primarily in the `./ansible` directory. They can be run manually but are typically
 run by the top level bash scripts.
@@ -108,6 +124,16 @@ for the actual locust scripts.
 You may have several versions of this file, and set an environment variable `ANSIBLE_HOSTS` to point to the desired one.
 
 The convenience script `exec_bench.sh` takes one of these files as its single parameter!
+
+## Firewall ports
+
+The following need to be enabled between your various machines (benchmark machine, p4d server(s), client machines):
+
+* 1666 (or other p4d port as you have configured them)
+* 22 (for ssh)
+* 5557 (default for Locust client/server comms)
+* 3000 (if using Grafana - for the web based interfaceß)
+* 9100 (node_exporter - if using Grafana - to allow collecting of metrics from various machines)
 
 ## Bootstrapping machines
 
@@ -126,11 +152,11 @@ This will prompt for password and then do the actions in the script.
 
 It is recommended to use the SDP to configure and start your instance, assigning appropriate storage etc.
 
-The benchmark scripts rely on an SDP structure being in place.
+The benchmark scripts rely on an SDP structure being in place (minor tweaks can be done for non-SDP).
 
 ## Creating repository files
 
-There is a script locust_files/createfiles.py which can be run to create large amounts of random content for binary and text files. 
+There is a script `locust_files/createfiles.py` which can be run to create large amounts of random content for binary and text files. 
 
 Typically you would use it to store content in a repository structure containing multiple buckets (e.g. 00 - 39) such as:
 
@@ -153,7 +179,7 @@ This is a manual step as you need to:
 * submit those files to the server (manually)
 
 RECOMMENDATION: Please use a different p4 user account to submit the files for your base setup. This makes it easy
-to reset your p4d repository by obliterating all changelists belonging to user `bruno` after a benchmark run.
+to reset your p4d repository by obliterating all changelists belonging to user `bruno` (for example) after a benchmark run.
 
 Note that it can take hours to perform these steps (the submitting of a large number of files - though typically only done once).
 
@@ -364,7 +390,6 @@ Check the output of:
 Running in no-web mode:
 
     locust -f p4_locust.py --no-web
-    locust -f svn_locust.py --no-web
 
 Running in web mode (defaults to http://localhost:8089):
 
